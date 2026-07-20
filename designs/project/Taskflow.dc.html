@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#09090c">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80">
+  <rect width="120" height="80" fill="#09090c"/>
+  <rect x="20" y="22" width="12" height="12" rx="2.5" fill="#6366f1"/>
+  <rect x="36" y="22" width="12" height="12" rx="2.5" fill="#6366f1" opacity="0.4"/>
+  <rect x="20" y="38" width="12" height="12" rx="2.5" fill="#6366f1" opacity="0.4"/>
+  <rect x="36" y="38" width="12" height="12" rx="2.5" fill="#6366f1"/>
+  <rect x="56" y="24" width="44" height="3" rx="1.5" fill="#f0f0f6" opacity="0.7"/>
+  <rect x="56" y="32" width="30" height="3" rx="1.5" fill="#f0f0f6" opacity="0.3"/>
+  <rect x="56" y="40" width="36" height="3" rx="1.5" fill="#f0f0f6" opacity="0.2"/>
+  <rect x="56" y="48" width="24" height="3" rx="1.5" fill="#f0f0f6" opacity="0.15"/>
+</svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body,#root{height:100%;width:100%}
+body{background:#09090c;color:#f0f0f6;font-family:'DM Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+input,textarea,button,select{font-family:inherit;font-size:inherit}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.09);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,0.15)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+
+<!-- ═══════════ AUTH SCREEN ═══════════ -->
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#09090c;background-image:radial-gradient(ellipse 90% 50% at 50% -5%, rgba(99,102,241,0.09) 0%, transparent 65%);padding:16px">
+  <div style="width:400px;max-width:100%;animation:fadeUp 0.4s ease both">
+
+    <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:44px">
+      <div style="width:34px;height:34px;background:#6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.2" fill="white"></rect><rect x="9" y="2" width="5" height="5" rx="1.2" fill="white" opacity="0.55"></rect><rect x="2" y="9" width="5" height="5" rx="1.2" fill="white" opacity="0.55"></rect><rect x="9" y="9" width="5" height="5" rx="1.2" fill="white"></rect></svg>
+      </div>
+      <span style="font-size:19px;font-weight:600;letter-spacing:-0.4px">Taskflow</span>
+    </div>
+
+    <div style="background:#111117;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:32px 30px">
+
+      <sc-if value="{{ isSignIn }}" hint-placeholder-val="{{ true }}">
+        <h2 style="font-size:21px;font-weight:600;letter-spacing:-0.4px;margin-bottom:5px">Welcome back</h2>
+        <p style="font-size:13.5px;color:#71717a;margin-bottom:28px">Sign in to your Taskflow workspace</p>
+        <div style="display:flex;flex-direction:column;gap:15px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px;letter-spacing:0.1px">Email address</label>
+            <input type="email" placeholder="you@company.com" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6;transition:border-color 0.15s">
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <label style="font-size:12px;font-weight:500;color:#9898b0;letter-spacing:0.1px">Password</label>
+              <a style="font-size:12px;color:#818cf8;cursor:pointer">Forgot password?</a>
+            </div>
+            <input type="password" placeholder="••••••••" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+          </div>
+        </div>
+        <button onClick="{{ signIn }}" style="width:100%;margin-top:22px;background:#6366f1;color:white;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:500;cursor:pointer;letter-spacing:-0.1px">Sign in</button>
+        <p style="text-align:center;margin-top:20px;font-size:13px;color:#71717a">No account? <a onClick="{{ toggleAuthMode }}" style="color:#818cf8;cursor:pointer;font-weight:500">Create one free</a></p>
+      </sc-if>
+
+      <sc-if value="{{ isRegister }}" hint-placeholder-val="{{ false }}">
+        <h2 style="font-size:21px;font-weight:600;letter-spacing:-0.4px;margin-bottom:5px">Create your account</h2>
+        <p style="font-size:13.5px;color:#71717a;margin-bottom:28px">Set up your Taskflow workspace</p>
+        <div style="display:flex;flex-direction:column;gap:15px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px;letter-spacing:0.1px">Organisation name</label>
+            <input type="text" placeholder="Acme Inc." style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px;letter-spacing:0.1px">Work email</label>
+            <input type="email" placeholder="you@company.com" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px;letter-spacing:0.1px">Password</label>
+            <input type="password" placeholder="Minimum 8 characters" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+          </div>
+        </div>
+        <button onClick="{{ signIn }}" style="width:100%;margin-top:22px;background:#6366f1;color:white;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:500;cursor:pointer">Create account</button>
+        <p style="text-align:center;margin-top:20px;font-size:13px;color:#71717a">Already have an account? <a onClick="{{ toggleAuthMode }}" style="color:#818cf8;cursor:pointer;font-weight:500">Sign in</a></p>
+      </sc-if>
+
+    </div>
+    <p style="text-align:center;margin-top:22px;font-size:11.5px;color:#3f3f52">By continuing you agree to our Terms of Service and Privacy Policy</p>
+  </div>
+</div>
+</sc-if>
+
+<!-- ═══════════ APP SHELL ═══════════ -->
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;height:100vh;background:#09090c;overflow:hidden">
+
+  <!-- SIDEBAR -->
+  <aside style="width:224px;min-width:224px;height:100%;background:#0c0c10;border-right:1px solid rgba(255,255,255,0.055);display:flex;flex-direction:column;padding:14px 10px">
+
+    <!-- Logo + org -->
+    <div style="display:flex;align-items:center;gap:9px;padding:6px 8px;margin-bottom:22px">
+      <div style="width:28px;height:28px;background:#6366f1;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1.2" fill="white"></rect><rect x="9" y="2" width="5" height="5" rx="1.2" fill="white" opacity="0.55"></rect><rect x="2" y="9" width="5" height="5" rx="1.2" fill="white" opacity="0.55"></rect><rect x="9" y="9" width="5" height="5" rx="1.2" fill="white"></rect></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;letter-spacing:-0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Taskflow</div>
+        <div style="font-size:11px;color:#52526a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Acme Inc.</div>
+      </div>
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="color:#52526a;flex-shrink:0"><path d="M5 7l3-3 3 3M5 9l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </div>
+
+    <!-- Nav -->
+    <nav style="display:flex;flex-direction:column;gap:1px">
+      <div onClick="{{ goToDashboard }}" style="{{ navDashSty }}" style-hover="opacity:1">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.5" fill="currentColor"></rect><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity="0.4"></rect><rect x="1.5" y="9" width="5.5" height="5.5" rx="1.5" fill="currentColor" opacity="0.4"></rect><rect x="9" y="9" width="5.5" height="5.5" rx="1.5" fill="currentColor"></rect></svg>
+        Dashboard
+      </div>
+      <div onClick="{{ goToTasks }}" style="{{ navTasksSty }}" style-hover="opacity:1">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4.5h12M2 8h9M2 11.5h6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+        Tasks
+      </div>
+      <div onClick="{{ goToSettings }}" style="{{ navSettingsSty }}" style-hover="opacity:1">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.76 3.76l1.06 1.06M11.18 11.18l1.06 1.06M12.24 3.76l-1.06 1.06M4.82 11.18l-1.06 1.06" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
+        Settings
+      </div>
+    </nav>
+
+    <!-- Projects section -->
+    <div style="margin-top:22px;padding:0 8px">
+      <div style="font-size:10.5px;font-weight:600;color:#3f3f52;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">Projects</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
+          <div style="width:7px;height:7px;border-radius:2px;background:#6366f1;flex-shrink:0"></div>
+          <span style="font-size:13px;color:#71717a">Product</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
+          <div style="width:7px;height:7px;border-radius:2px;background:#22d3ee;flex-shrink:0"></div>
+          <span style="font-size:13px;color:#71717a">Engineering</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
+          <div style="width:7px;height:7px;border-radius:2px;background:#f59e0b;flex-shrink:0"></div>
+          <span style="font-size:13px;color:#71717a">Docs</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1"></div>
+
+    <!-- User -->
+    <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:12px;margin-top:8px">
+      <div style="display:flex;align-items:center;gap:9px;padding:8px 8px;border-radius:8px;cursor:pointer" style-hover="background:rgba(255,255,255,0.04)">
+        <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">AC</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Alex Chen</div>
+          <div style="font-size:11px;color:#52526a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">alex@acme.io</div>
+        </div>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="color:#52526a;flex-shrink:0"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main style="flex:1;overflow-y:auto;position:relative;display:flex;flex-direction:column">
+
+    <!-- ─── DASHBOARD ─── -->
+    <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:36px 40px;max-width:1040px;animation:fadeIn 0.2s ease">
+
+      <div style="margin-bottom:34px">
+        <h1 style="font-size:23px;font-weight:600;letter-spacing:-0.5px;margin-bottom:4px">Good morning, Alex</h1>
+        <p style="font-size:13.5px;color:#71717a">Sunday, 20 July 2026 · Acme Inc.</p>
+      </div>
+
+      <!-- Stat cards -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px">
+        <div onClick="{{ goToTasks }}" style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:20px 22px;cursor:pointer" style-hover="border-color:rgba(255,255,255,0.12)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <span style="font-size:11.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">To Do</span>
+            <div style="width:8px;height:8px;border-radius:50%;border:1.5px solid #52526a"></div>
+          </div>
+          <div style="font-size:36px;font-weight:600;letter-spacing:-2px;margin-bottom:3px">{{ todoCnt }}</div>
+          <div style="font-size:12px;color:#52526a">tasks pending</div>
+        </div>
+        <div onClick="{{ goToTasks }}" style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:20px 22px;cursor:pointer" style-hover="border-color:rgba(255,255,255,0.12)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <span style="font-size:11.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">In Progress</span>
+            <div style="width:8px;height:8px;border-radius:50%;background:#f59e0b"></div>
+          </div>
+          <div style="font-size:36px;font-weight:600;letter-spacing:-2px;color:#f59e0b;margin-bottom:3px">{{ inProgressCnt }}</div>
+          <div style="font-size:12px;color:#52526a">active tasks</div>
+        </div>
+        <div onClick="{{ goToTasks }}" style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:20px 22px;cursor:pointer" style-hover="border-color:rgba(255,255,255,0.12)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <span style="font-size:11.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Completed</span>
+            <div style="width:8px;height:8px;border-radius:50%;background:#22c55e"></div>
+          </div>
+          <div style="font-size:36px;font-weight:600;letter-spacing:-2px;color:#22c55e;margin-bottom:3px">{{ doneCnt }}</div>
+          <div style="font-size:12px;color:#52526a">this sprint</div>
+        </div>
+      </div>
+
+      <!-- Lower grid -->
+      <div style="display:grid;grid-template-columns:1fr 1.05fr;gap:16px">
+
+        <!-- Activity feed -->
+        <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:22px">
+          <h3 style="font-size:13px;font-weight:600;margin-bottom:20px">Recent activity</h3>
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <sc-for list="{{ activities }}" as="act" hint-placeholder-count="5">
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <div style="width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.35),rgba(139,92,246,0.35));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;margin-top:1px">{{ act.av }}</div>
+                <div style="flex:1;min-width:0">
+                  <p style="font-size:12.5px;color:#9898b0;line-height:1.45"><span style="color:#d4d4e8;font-weight:500">{{ act.user }}</span> {{ act.text }}</p>
+                  <p style="font-size:11px;color:#52526a;margin-top:2px">{{ act.time }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- My tasks quick view -->
+        <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:22px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+            <h3 style="font-size:13px;font-weight:600">Open tasks</h3>
+            <a onClick="{{ goToTasks }}" style="font-size:12px;color:#818cf8;cursor:pointer">View all →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <sc-for list="{{ recentTasks }}" as="rt" hint-placeholder-count="5">
+              <div onClick="{{ rt.onClick }}" style="display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;background:rgba(255,255,255,0.015)" style-hover="background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.09)">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ rt.title }}</div>
+                  <div style="font-size:11.5px;color:#52526a;margin-top:1px">{{ rt.project }} · {{ rt.due }}</div>
+                </div>
+                <span style="{{ rt.statusSty }}">{{ rt.statusLabel }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ─── TASK LIST ─── -->
+    <sc-if value="{{ isTasks }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:36px 40px;animation:fadeIn 0.2s ease">
+
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
+        <div>
+          <h1 style="font-size:21px;font-weight:600;letter-spacing:-0.4px">Tasks</h1>
+          <p style="font-size:13px;color:#71717a;margin-top:3px">{{ totalCnt }} tasks · Acme Inc.</p>
+        </div>
+        <button onClick="{{ openNewTask }}" style="display:flex;align-items:center;gap:7px;background:#6366f1;color:white;border:none;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:500;cursor:pointer;flex-shrink:0">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"></path></svg>
+          New task
+        </button>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="display:flex;background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:3px;gap:2px">
+          <button onClick="{{ setFilterAll }}" style="{{ filterAllSty }}">All</button>
+          <button onClick="{{ setFilterTodo }}" style="{{ filterTodoSty }}">To Do</button>
+          <button onClick="{{ setFilterProgress }}" style="{{ filterProgressSty }}">In Progress</button>
+          <button onClick="{{ setFilterDone }}" style="{{ filterDoneSty }}">Done</button>
+        </div>
+        <div style="position:relative;flex:1;min-width:180px;max-width:260px">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#52526a;pointer-events:none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"></circle><path d="M12.5 12.5l1.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+          <input value="{{ searchQuery }}" onChange="{{ setSearch }}" placeholder="Search tasks…" style="width:100%;background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 12px 8px 32px;font-size:13px;color:#f0f0f6">
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr 148px 118px 90px 100px;padding:10px 18px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.018)">
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Title</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Assignee</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Status</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Priority</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Due</span>
+        </div>
+        <sc-for list="{{ filteredTasks }}" as="task" hint-placeholder-count="6">
+          <div onClick="{{ task.onClick }}" style="display:grid;grid-template-columns:1fr 148px 118px 90px 100px;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:background 0.1s" style-hover="background:rgba(255,255,255,0.025)">
+            <div style="padding-right:18px">
+              <div style="font-size:13.5px;font-weight:500;color:#e8e8f2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ task.title }}</div>
+              <div style="font-size:11.5px;color:#52526a;margin-top:2px">{{ task.project }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.45),rgba(139,92,246,0.45));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0">{{ task.av }}</div>
+              <span style="font-size:12.5px;color:#9898b0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ task.assignee }}</span>
+            </div>
+            <div style="display:flex;align-items:center">
+              <span style="{{ task.statusSty }}">{{ task.statusLabel }}</span>
+            </div>
+            <div style="display:flex;align-items:center">
+              <span style="{{ task.prioritySty }}">{{ task.priorityLabel }}</span>
+            </div>
+            <div style="display:flex;align-items:center">
+              <span style="font-size:12.5px;color:#71717a">{{ task.due }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+    </sc-if>
+
+    <!-- ─── TASK DETAIL ─── -->
+    <sc-if value="{{ isTaskDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:36px 40px;max-width:900px;animation:fadeIn 0.2s ease">
+
+      <button onClick="{{ backToTasks }}" style="display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#71717a;font-size:13px;cursor:pointer;padding:0;margin-bottom:26px;font-family:inherit" style-hover="color:#f0f0f6">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        Back to tasks
+      </button>
+
+      <div style="display:grid;grid-template-columns:1fr 248px;gap:22px;align-items:start">
+
+        <!-- Left: content -->
+        <div>
+          <div style="display:inline-flex;align-items:center;gap:6px;margin-bottom:13px">
+            <span style="background:rgba(99,102,241,0.1);color:#818cf8;font-size:11px;font-weight:600;padding:3px 9px;border-radius:5px">{{ selectedTask.project }}</span>
+          </div>
+          <h1 style="font-size:23px;font-weight:600;letter-spacing:-0.5px;line-height:1.28;margin-bottom:13px">{{ selectedTask.title }}</h1>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:26px">
+            <span style="{{ selectedTask.statusSty }}">{{ selectedTask.statusLabel }}</span>
+            <span style="color:#3f3f52;font-size:12px">·</span>
+            <span style="{{ selectedTask.prioritySty }}">{{ selectedTask.priorityLabel }} priority</span>
+            <span style="color:#3f3f52;font-size:12px">·</span>
+            <span style="font-size:12.5px;color:#52526a">Due {{ selectedTask.due }}</span>
+          </div>
+
+          <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px 22px;margin-bottom:18px">
+            <h4 style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:12px">Description</h4>
+            <p style="font-size:14px;color:#c8c8dc;line-height:1.7;text-wrap:pretty">{{ selectedTask.description }}</p>
+          </div>
+
+          <!-- Comments -->
+          <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px 22px">
+            <h4 style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:18px">Comments</h4>
+            <div style="display:flex;flex-direction:column;gap:16px;margin-bottom:22px">
+              <sc-for list="{{ comments }}" as="cmt" hint-placeholder-count="2">
+                <div style="display:flex;gap:10px">
+                  <div style="width:29px;height:29px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.35),rgba(139,92,246,0.35));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0">{{ cmt.av }}</div>
+                  <div style="flex:1;background:#18181f;border:1px solid rgba(255,255,255,0.06);border-radius:9px;padding:12px 14px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                      <span style="font-size:13px;font-weight:500">{{ cmt.user }}</span>
+                      <span style="font-size:11px;color:#52526a">{{ cmt.time }}</span>
+                    </div>
+                    <p style="font-size:13.5px;color:#c8c8dc;line-height:1.55">{{ cmt.text }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:29px;height:29px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;margin-top:2px">AC</div>
+              <div style="flex:1">
+                <textarea placeholder="Add a comment…" rows="3" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:11px 13px;font-size:13.5px;color:#f0f0f6;resize:none;line-height:1.55"></textarea>
+                <div style="display:flex;justify-content:flex-end;margin-top:8px">
+                  <button style="background:#6366f1;color:white;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer">Post comment</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: metadata -->
+        <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:18px;position:sticky;top:36px">
+
+          <div>
+            <div style="font-size:10.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px">Status</div>
+            <span style="{{ selectedTask.statusSty }}">{{ selectedTask.statusLabel }}</span>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:18px">
+            <div style="font-size:10.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px">Priority</div>
+            <span style="{{ selectedTask.prioritySty }}">{{ selectedTask.priorityLabel }}</span>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:18px">
+            <div style="font-size:10.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:9px">Assignee</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.45),rgba(139,92,246,0.45));display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;flex-shrink:0">{{ selectedTask.av }}</div>
+              <span style="font-size:13px;color:#c8c8dc">{{ selectedTask.assignee }}</span>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:18px">
+            <div style="font-size:10.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px">Due Date</div>
+            <span style="font-size:13px;color:#c8c8dc">{{ selectedTask.due }}</span>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:18px">
+            <div style="font-size:10.5px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:7px">Project</div>
+            <span style="font-size:13px;color:#c8c8dc">{{ selectedTask.project }}</span>
+          </div>
+
+          <div style="border-top:1px solid rgba(255,255,255,0.055);padding-top:18px;display:flex;flex-direction:column;gap:8px">
+            <button style="width:100%;background:rgba(255,255,255,0.05);color:#e8e8f2;border:1px solid rgba(255,255,255,0.09);border-radius:7px;padding:9px;font-size:13px;font-weight:500;cursor:pointer" style-hover="background:rgba(255,255,255,0.08)">Edit task</button>
+            <button style="width:100%;background:rgba(239,68,68,0.07);color:#ef4444;border:1px solid rgba(239,68,68,0.14);border-radius:7px;padding:9px;font-size:13px;font-weight:500;cursor:pointer">Delete task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- ─── SETTINGS ─── -->
+    <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:36px 40px;max-width:820px;animation:fadeIn 0.2s ease">
+
+      <div style="margin-bottom:32px">
+        <h1 style="font-size:21px;font-weight:600;letter-spacing:-0.4px">Organisation settings</h1>
+        <p style="font-size:13px;color:#71717a;margin-top:4px">Manage your team and workspace</p>
+      </div>
+
+      <!-- Invite card -->
+      <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:22px 24px;margin-bottom:18px">
+        <h3 style="font-size:14px;font-weight:600;margin-bottom:4px">Invite team member</h3>
+        <p style="font-size:13px;color:#71717a;margin-bottom:18px">New members will receive an email invitation to join Acme Inc.</p>
+
+        <sc-if value="{{ inviteSuccess }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:9px;background:rgba(34,197,94,0.07);border:1px solid rgba(34,197,94,0.14);border-radius:8px;padding:11px 14px">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#22c55e" opacity="0.15"></circle><path d="M5 8l2.2 2.2 3.8-4" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <span style="font-size:13px;color:#22c55e;flex:1">Invitation sent successfully.</span>
+            <button onClick="{{ dismissInvite }}" style="background:none;border:none;color:#52526a;cursor:pointer;font-size:12px;font-family:inherit;padding:0" style-hover="color:#9898b0">Dismiss</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isInviteForm }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Email address</label>
+              <input value="{{ inviteEmail }}" onChange="{{ setInviteEmail }}" type="email" placeholder="colleague@company.com" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:13.5px;color:#f0f0f6">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Role</label>
+              <select style="background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:13.5px;color:#f0f0f6;cursor:pointer">
+                <option>Member</option>
+                <option>Admin</option>
+              </select>
+            </div>
+            <button onClick="{{ submitInvite }}" style="background:#6366f1;color:white;border:none;border-radius:8px;padding:10px 18px;font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap">Send invite</button>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- Members table -->
+      <div style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;overflow:hidden">
+        <div style="padding:16px 22px;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <h3 style="font-size:14px;font-weight:600">Team members</h3>
+          <p style="font-size:12px;color:#71717a;margin-top:2px">{{ memberCnt }} members in Acme Inc.</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 100px 90px;padding:9px 22px;border-bottom:1px solid rgba(255,255,255,0.055);background:rgba(255,255,255,0.018)">
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Name</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Email</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Role</span>
+          <span style="font-size:11px;font-weight:600;color:#52526a;text-transform:uppercase;letter-spacing:0.6px">Joined</span>
+        </div>
+        <sc-for list="{{ members }}" as="member" hint-placeholder-count="4">
+          <div style="display:grid;grid-template-columns:1fr 1fr 100px 90px;padding:14px 22px;border-bottom:1px solid rgba(255,255,255,0.04);align-items:center" style-hover="background:rgba(255,255,255,0.02)">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:31px;height:31px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.4),rgba(139,92,246,0.4));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">{{ member.av }}</div>
+              <span style="font-size:13.5px;font-weight:500">{{ member.name }}</span>
+            </div>
+            <span style="font-size:13px;color:#9898b0">{{ member.email }}</span>
+            <span style="{{ member.roleSty }}">{{ member.role }}</span>
+            <span style="font-size:12px;color:#52526a">{{ member.joined }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+    </div>
+    </sc-if>
+
+    <!-- ─── NEW TASK MODAL ─── -->
+    <sc-if value="{{ showNewTask }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewTask }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:fadeIn 0.15s ease">
+      <div onClick="{{ stopPropagation }}" style="background:#111117;border:1px solid rgba(255,255,255,0.1);border-radius:13px;padding:28px 28px 24px;width:500px;max-width:calc(100vw - 32px);animation:fadeUp 0.2s ease">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+          <h2 style="font-size:17px;font-weight:600;letter-spacing:-0.3px">New task</h2>
+          <button onClick="{{ closeNewTask }}" style="background:none;border:none;color:#52526a;cursor:pointer;padding:4px;border-radius:5px;line-height:1;font-size:18px" style-hover="color:#f0f0f6">✕</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Title</label>
+            <input type="text" placeholder="What needs to be done?" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Description</label>
+            <textarea rows="3" placeholder="Optional — add more context…" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:13.5px;color:#f0f0f6;resize:none;line-height:1.55"></textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Assignee</label>
+              <select style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;font-size:13px;color:#f0f0f6;cursor:pointer;font-family:inherit">
+                <option>Alex Chen</option>
+                <option>Jordan Kim</option>
+                <option>Sam Rivera</option>
+                <option>Morgan Patel</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Priority</label>
+              <select style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;font-size:13px;color:#f0f0f6;cursor:pointer;font-family:inherit">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Due date</label>
+              <input type="date" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:9px 12px;font-size:13px;color:#9898b0;cursor:pointer;font-family:inherit">
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:22px">
+          <button onClick="{{ closeNewTask }}" style="background:rgba(255,255,255,0.05);color:#9898b0;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer">Cancel</button>
+          <button onClick="{{ closeNewTask }}" style="background:#6366f1;color:white;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer">Create task</button>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+  </main>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: 'auth',
+    authMode: 'signin',
+    selectedTaskId: 1,
+    searchQuery: '',
+    statusFilter: 'all',
+    showNewTask: false,
+    inviteEmail: '',
+    inviteSuccess: false,
+  };
+
+  tasks = [
+    { id: 1, title: 'Redesign onboarding flow', assignee: 'Alex Chen', av: 'AC', status: 'in-progress', priority: 'high', due: 'Jul 25', project: 'Product', description: 'Rethink the entire new user onboarding experience to reduce drop-off and improve activation rates. Focus on progressive disclosure and contextual guidance — step by step, only surfacing what the user needs at each moment.' },
+    { id: 2, title: 'API rate limiting implementation', assignee: 'Jordan Kim', av: 'JK', status: 'todo', priority: 'high', due: 'Jul 28', project: 'Engineering', description: 'Implement per-tenant rate limiting for the public API. Should support configurable limits per plan tier with proper 429 responses, retry-after headers, and a dashboard showing current usage.' },
+    { id: 3, title: 'Update billing documentation', assignee: 'Sam Rivera', av: 'SR', status: 'done', priority: 'low', due: 'Jul 20', project: 'Docs', description: 'Update the billing section of the docs to reflect the new pricing structure introduced in Q2. Include clear documentation for the upgrade, downgrade, and cancellation flows.' },
+    { id: 4, title: 'Set up CI/CD pipeline', assignee: 'Alex Chen', av: 'AC', status: 'in-progress', priority: 'medium', due: 'Jul 30', project: 'Engineering', description: 'Configure GitHub Actions workflows for automated testing, building, and deployment to staging and production environments. Should include rollback capability.' },
+    { id: 5, title: 'Customer feedback analysis', assignee: 'Jordan Kim', av: 'JK', status: 'todo', priority: 'medium', due: 'Aug 2', project: 'Product', description: 'Analyse Q2 NPS survey results and open support tickets to identify top friction points and feature requests. Output a ranked list for roadmap prioritisation.' },
+    { id: 6, title: 'Fix mobile responsiveness bugs', assignee: 'Sam Rivera', av: 'SR', status: 'done', priority: 'medium', due: 'Jul 18', project: 'Engineering', description: 'Address the 12 open mobile layout issues in the bug tracker, prioritising the dashboard and task list views which affect the most users.' },
+    { id: 7, title: 'Implement SSO authentication', assignee: 'Morgan Patel', av: 'MP', status: 'todo', priority: 'high', due: 'Aug 5', project: 'Engineering', description: 'Add SAML 2.0 and OIDC support for enterprise customers. Must be compatible with Okta, Azure AD, and Google Workspace. Include an admin setup wizard.' },
+    { id: 8, title: 'Q3 product roadmap', assignee: 'Alex Chen', av: 'AC', status: 'in-progress', priority: 'medium', due: 'Jul 31', project: 'Product', description: 'Compile and prioritise the Q3 roadmap based on customer feedback, strategic objectives, and engineering capacity. Share a draft with stakeholders by month end.' },
+  ];
+
+  members = [
+    { id: 1, name: 'Alex Chen', email: 'alex@acme.io', role: 'Admin', av: 'AC', joined: 'Jan 2025' },
+    { id: 2, name: 'Jordan Kim', email: 'jordan@acme.io', role: 'Member', av: 'JK', joined: 'Mar 2025' },
+    { id: 3, name: 'Sam Rivera', email: 'sam@acme.io', role: 'Member', av: 'SR', joined: 'Apr 2025' },
+    { id: 4, name: 'Morgan Patel', email: 'morgan@acme.io', role: 'Member', av: 'MP', joined: 'Jun 2025' },
+  ];
+
+  activities = [
+    { av: 'AC', user: 'Alex Chen', text: 'created task Redesign onboarding flow', time: '2m ago' },
+    { av: 'JK', user: 'Jordan Kim', text: 'moved API rate limiting to In Progress', time: '1h ago' },
+    { av: 'SR', user: 'Sam Rivera', text: 'completed Fix mobile responsiveness bugs', time: '3h ago' },
+    { av: 'MP', user: 'Morgan Patel', text: 'commented on Implement SSO authentication', time: '5h ago' },
+    { av: 'AC', user: 'Alex Chen', text: 'assigned Q3 product roadmap to themselves', time: '1d ago' },
+  ];
+
+  comments = [
+    { av: 'JK', user: 'Jordan Kim', text: "Started investigating this. The main challenge will be handling existing users gracefully during the transition — we don't want to disrupt active sessions.", time: '2h ago' },
+    { av: 'SR', user: 'Sam Rivera', text: "Agreed. We should also align on the mobile breakpoints and animation spec before implementation starts — would save a round of revisions.", time: '1h ago' },
+  ];
+
+  renderVals() {
+    const s = this.state;
+
+    const statusBadge = (status) => {
+      if (status === 'todo') return { label: 'To Do', sty: { background: 'rgba(255,255,255,0.06)', color: '#9898b0', padding: '3px 9px', borderRadius: '5px', fontSize: '11.5px', fontWeight: 500, display: 'inline-block', whiteSpace: 'nowrap' } };
+      if (status === 'in-progress') return { label: 'In Progress', sty: { background: 'rgba(245,158,11,0.1)', color: '#f59e0b', padding: '3px 9px', borderRadius: '5px', fontSize: '11.5px', fontWeight: 500, display: 'inline-block', whiteSpace: 'nowrap' } };
+      return { label: 'Done', sty: { background: 'rgba(34,197,94,0.1)', color: '#22c55e', padding: '3px 9px', borderRadius: '5px', fontSize: '11.5px', fontWeight: 500, display: 'inline-block', whiteSpace: 'nowrap' } };
+    };
+
+    const priorityBadge = (p) => {
+      if (p === 'low') return { label: 'Low', sty: { color: '#52526a', fontSize: '12.5px', fontWeight: 500 } };
+      if (p === 'medium') return { label: 'Medium', sty: { color: '#f59e0b', fontSize: '12.5px', fontWeight: 500 } };
+      return { label: 'High', sty: { color: '#ef4444', fontSize: '12.5px', fontWeight: 500 } };
+    };
+
+    const enrichTask = (t) => {
+      const sb = statusBadge(t.status);
+      const pb = priorityBadge(t.priority);
+      return { ...t, statusLabel: sb.label, statusSty: sb.sty, priorityLabel: pb.label, prioritySty: pb.sty };
+    };
+
+    const navBase = { display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 10px', borderRadius: '7px', cursor: 'pointer', fontSize: '13.5px', fontWeight: 400, transition: 'all 0.12s' };
+    const navActive = { ...navBase, background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', fontWeight: 500 };
+    const navInactive = { ...navBase, color: '#71717a' };
+
+    const fBase = { padding: '5px 11px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontSize: '12.5px', fontWeight: 500, transition: 'all 0.12s', fontFamily: 'inherit' };
+    const fActive = { ...fBase, background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' };
+    const fInactive = { ...fBase, background: 'transparent', color: '#71717a' };
+
+    let filtered = this.tasks;
+    if (s.statusFilter !== 'all') filtered = filtered.filter(t => t.status === s.statusFilter);
+    if (s.searchQuery) {
+      const q = s.searchQuery.toLowerCase();
+      filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || t.assignee.toLowerCase().includes(q));
+    }
+
+    const selectedTask = this.tasks.find(t => t.id === s.selectedTaskId) || this.tasks[0];
+
+    const todoCnt = this.tasks.filter(t => t.status === 'todo').length;
+    const inProgressCnt = this.tasks.filter(t => t.status === 'in-progress').length;
+    const doneCnt = this.tasks.filter(t => t.status === 'done').length;
+
+    return {
+      isAuth: s.view === 'auth',
+      isApp: s.view !== 'auth',
+      isDashboard: s.view === 'dashboard',
+      isTasks: s.view === 'tasks',
+      isTaskDetail: s.view === 'task-detail',
+      isSettings: s.view === 'settings',
+      isSignIn: s.authMode === 'signin',
+      isRegister: s.authMode === 'register',
+      showNewTask: s.showNewTask,
+      inviteSuccess: s.inviteSuccess,
+      isInviteForm: !s.inviteSuccess,
+
+      navDashSty: s.view === 'dashboard' ? navActive : navInactive,
+      navTasksSty: (s.view === 'tasks' || s.view === 'task-detail') ? navActive : navInactive,
+      navSettingsSty: s.view === 'settings' ? navActive : navInactive,
+
+      filterAllSty: s.statusFilter === 'all' ? fActive : fInactive,
+      filterTodoSty: s.statusFilter === 'todo' ? fActive : fInactive,
+      filterProgressSty: s.statusFilter === 'in-progress' ? fActive : fInactive,
+      filterDoneSty: s.statusFilter === 'done' ? fActive : fInactive,
+
+      searchQuery: s.searchQuery,
+      inviteEmail: s.inviteEmail,
+      todoCnt, inProgressCnt, doneCnt,
+      totalCnt: this.tasks.length,
+      memberCnt: this.members.length,
+
+      activities: this.activities,
+      comments: this.comments,
+
+      recentTasks: this.tasks.filter(t => t.status !== 'done').slice(0, 5).map(t => ({
+        ...enrichTask(t),
+        onClick: () => this.setState({ view: 'task-detail', selectedTaskId: t.id }),
+      })),
+
+      filteredTasks: filtered.map(t => ({
+        ...enrichTask(t),
+        onClick: () => this.setState({ view: 'task-detail', selectedTaskId: t.id }),
+      })),
+
+      selectedTask: enrichTask(selectedTask),
+
+      members: this.members.map(m => ({
+        ...m,
+        roleSty: m.role === 'Admin'
+          ? { background: 'rgba(99,102,241,0.1)', color: '#a5b4fc', padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 'fit-content' }
+          : { background: 'rgba(255,255,255,0.05)', color: '#71717a', padding: '2px 6px', borderRadius: '4px', fontSize: '9px', fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 'fit-content' },
+      })),
+
+      signIn: () => this.setState({ view: 'dashboard' }),
+      toggleAuthMode: () => this.setState(p => ({ authMode: p.authMode === 'signin' ? 'register' : 'signin' })),
+      goToDashboard: () => this.setState({ view: 'dashboard' }),
+      goToTasks: () => this.setState({ view: 'tasks' }),
+      goToSettings: () => this.setState({ view: 'settings' }),
+      backToTasks: () => this.setState({ view: 'tasks' }),
+      openNewTask: () => this.setState({ showNewTask: true }),
+      closeNewTask: () => this.setState({ showNewTask: false }),
+      stopPropagation: (e) => e.stopPropagation(),
+      setSearch: (e) => this.setState({ searchQuery: e.target.value }),
+      setFilterAll: () => this.setState({ statusFilter: 'all' }),
+      setFilterTodo: () => this.setState({ statusFilter: 'todo' }),
+      setFilterProgress: () => this.setState({ statusFilter: 'in-progress' }),
+      setFilterDone: () => this.setState({ statusFilter: 'done' }),
+      setInviteEmail: (e) => this.setState({ inviteEmail: e.target.value }),
+      submitInvite: () => this.setState({ inviteSuccess: true, inviteEmail: '' }),
+      dismissInvite: () => this.setState({ inviteSuccess: false }),
+    };
+  }
+}
+</script>
+</body>
+</html>
