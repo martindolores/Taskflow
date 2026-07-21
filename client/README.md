@@ -2,6 +2,8 @@
 
 React + TypeScript frontend for Taskflow, built with Vite and MUI. See [`../docs/frontend-plan.md`](../docs/frontend-plan.md) for the full technical spec and build plan.
 
+CI: lint, format check, type check, build, and e2e run on every PR touching `client/**` (see `.github/workflows/frontend-ci.yml`).
+
 ## Stack
 
 Vite, React 19, TypeScript, MUI v9 (Emotion), React Router, TanStack Query, React Hook Form + Zod, Axios.
