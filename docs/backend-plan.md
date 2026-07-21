@@ -123,7 +123,9 @@ Every write and read (other than auth) flows through an Application-layer servic
 
 Each chunk is one PR. Chunks are strictly ordered — later chunks depend on earlier ones.
 
-### PR-B0 — Repo & solution scaffolding
+**Status: PR-B0 through PR-B12 are all shipped.** The core backend is complete and deployed (see `docs/deployment-plan.md`). Only the [Nice to Have](#6-nice-to-have) items remain unbuilt.
+
+### PR-B0 — Repo & solution scaffolding ✅
 
 No endpoints. Sets up the skeleton everything else builds on.
 
@@ -132,7 +134,7 @@ No endpoints. Sets up the skeleton everything else builds on.
 - Empty `Program.cs` that boots and returns 200 on `/`
 - `README.md` stub
 
-### PR-B1 — Web API bootstrap & cross-cutting concerns
+### PR-B1 — Web API bootstrap & cross-cutting concerns ✅
 
 - Serilog console logging (structured, request logging middleware)
 - Global exception-handling middleware → RFC 7807 `ProblemDetails` JSON responses
@@ -145,7 +147,7 @@ No endpoints. Sets up the skeleton everything else builds on.
 |--------|-------|---------|----------|
 | GET | `/health` | — | `200 { "status": "healthy" }` |
 
-### PR-B2 — Database & EF Core setup
+### PR-B2 — Database & EF Core setup ✅
 
 - `Npgsql.EntityFrameworkCore.PostgreSQL` + `AppDbContext` (no entities yet)
 - Connection string from `ConnectionStrings__Default` env var
@@ -154,7 +156,7 @@ No endpoints. Sets up the skeleton everything else builds on.
 
 No endpoints.
 
-### PR-B3 — Domain entities & initial migration
+### PR-B3 — Domain entities & initial migration ✅
 
 - Entities: `Organization`, `User`, `Task`, `TaskComment`, `Invitation`, `RefreshToken` (per the data model above), each with an `IEntityTypeConfiguration<T>` in Infrastructure
 - Enums: `UserRole`, `UserStatus`, `TaskStatus`, `TaskPriority`, `InvitationStatus`, stored as Postgres `varchar` via EF Core value conversion (readable in the DB, no enum-migration pain)
@@ -163,7 +165,7 @@ No endpoints.
 
 No endpoints.
 
-### PR-B4 — Auth: registration, login, JWT issuance
+### PR-B4 — Auth: registration, login, JWT issuance ✅
 
 - `IPasswordHasher` (BCrypt), `IJwtTokenService` (issues access + refresh tokens), `ICurrentUserService`
 - `AddAuthentication().AddJwtBearer(...)` wired in the API; claims: `sub` (user id), `org` (organization id), `role`
@@ -177,7 +179,7 @@ No endpoints.
 | POST | `/api/auth/refresh` | `{ refreshToken }` | `200 { accessToken, refreshToken }` — rotates the refresh token |
 | POST | `/api/auth/logout` | `{ refreshToken }` | `204` — revokes the refresh token |
 
-### PR-B5 — Tenant isolation & authorization infrastructure
+### PR-B5 — Tenant isolation & authorization infrastructure ✅
 
 - `ICurrentTenantService` populated from JWT claims per-request (scoped DI)
 - EF Core global query filters on `User`, `Task`, `TaskComment`, `Invitation` scoped to `CurrentTenant.OrganizationId`
@@ -189,7 +191,7 @@ No endpoints.
 |--------|-------|---------|----------|
 | GET | `/api/users/me` | — (JWT required) | `200 { id, email, firstName, lastName, role, organizationId, organizationName }` |
 
-### PR-B6 — Organization members & invitations
+### PR-B6 — Organization members & invitations ✅
 
 **Endpoints**
 | Method | Route | Request body | Response |
@@ -203,7 +205,7 @@ No endpoints.
 | PATCH | `/api/organization/members/{userId}/role` *(Admin)* | `{ role }` | `200 { id, role }` |
 | DELETE | `/api/organization/members/{userId}` *(Admin)* | — | `204` — sets status to `Deactivated` (no hard delete, preserves task/comment history) |
 
-### PR-B7 — Task CRUD
+### PR-B7 — Task CRUD ✅
 
 **Endpoints**
 | Method | Route | Request | Response |
@@ -215,7 +217,7 @@ No endpoints.
 | PATCH | `/api/tasks/{id}/status` | `{ status }` | `200 { id, status }` — lightweight endpoint for board drag-and-drop |
 | DELETE | `/api/tasks/{id}` *(Admin or task creator)* | — | `204` |
 
-### PR-B8 — Task comments
+### PR-B8 — Task comments ✅
 
 **Endpoints**
 | Method | Route | Request | Response |
@@ -224,7 +226,7 @@ No endpoints.
 | POST | `/api/tasks/{taskId}/comments` | `{ body }` | `201 { id, body, authorId, authorName, createdAt }` |
 | DELETE | `/api/tasks/{taskId}/comments/{commentId}` *(author or Admin)* | — | `204` |
 
-### PR-B9 — Validation, error handling & pagination polish
+### PR-B9 — Validation, error handling & pagination polish ✅
 
 - Validation endpoint filter applied consistently across all mutating endpoints → `400` `ProblemDetails` with field-level errors
 - Standard `PagedResult<T>` wrapper reused across list endpoints
@@ -232,7 +234,7 @@ No endpoints.
 
 No new endpoints — hardening pass across PR-B4 through PR-B8.
 
-### PR-B10 — xUnit test suite
+### PR-B10 — xUnit test suite ✅
 
 - Unit tests: Application-layer services, validators
 - Integration tests: `WebApplicationFactory` + Testcontainers Postgres — full HTTP round trips
@@ -240,7 +242,7 @@ No new endpoints — hardening pass across PR-B4 through PR-B8.
 
 No new endpoints.
 
-### PR-B11 — Dockerfile & Render deployment config
+### PR-B11 — Dockerfile & Render deployment config ✅
 
 - Multi-stage `Dockerfile` (SDK build stage → ASP.NET runtime stage)
 - `render.yaml` (Blueprint) or manual Render Web Service pointing at the Dockerfile
@@ -249,7 +251,7 @@ No new endpoints.
 
 No new endpoints.
 
-### PR-B12 — GitHub Actions CI (backend)
+### PR-B12 — GitHub Actions CI (backend) ✅
 
 See [Section 5](#5-github-actions-cicd) below.
 
@@ -304,6 +306,8 @@ Render's own GitHub integration can also auto-deploy on push to `main` without a
 ## 6. Nice to Have
 
 Two features surfaced by the frontend design ([`designs/project/Taskflow.dc.html`](../designs/project/Taskflow.dc.html)) that aren't part of the original spec. Kept out of the core PR-B0–B12 sequence so the MVP stays lean; pick these up afterward if there's time. Each is its own PR, built on top of PR-B12.
+
+**Status: not started.** Neither NH-B1 nor NH-B2 has any code in `server/src` yet.
 
 ### NH-B1 — Projects
 

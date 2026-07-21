@@ -93,7 +93,9 @@ Tokens and component conventions extracted from the Taskflow prototype (see link
 
 Each chunk is one PR, ordered so it never lands ahead of the backend endpoints it needs.
 
-### PR-F0 — Project scaffold
+**Status: PR-F0 through PR-F13 are all shipped.** The core frontend is complete and deployed (see `docs/deployment-plan.md`). Only the [Nice to Have](#6-nice-to-have) items remain unbuilt.
+
+### PR-F0 — Project scaffold ✅
 
 - Vite + React + TS template
 - MUI + Emotion installed, `ThemeProvider` configured with the palette/typography/shape tokens from [Section 2](#2-design-reference) (dark mode, DM Sans, indigo primary)
@@ -102,7 +104,7 @@ Each chunk is one PR, ordered so it never lands ahead of the backend endpoints i
 
 No screens, no backend dependency.
 
-### PR-F1 — API client & env config
+### PR-F1 — API client & env config ✅
 
 - Axios instance, `baseURL` from `VITE_API_URL`
 - Response interceptor: on `401`, attempt one silent refresh via `/api/auth/refresh`, then retry the original request; on failure, clear session and redirect to login
@@ -111,7 +113,7 @@ No screens, no backend dependency.
 
 **Depends on:** `GET /health` (smoke test only)
 
-### PR-F2 — Auth screens & session management
+### PR-F2 — Auth screens & session management ✅
 
 - Screens: **Register** (organization name + admin's own details), **Login** — the prototype's Auth screen defines both as a single centered card with a sign-in/register toggle link; build that as one `AuthScreen` component with local mode state, not two routes
 - `AuthContext`: current user, `accessToken`/`refreshToken`, `login()`, `logout()`, tokens persisted to `localStorage`
@@ -120,14 +122,14 @@ No screens, no backend dependency.
 
 **Depends on:** `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/refresh`, `GET /api/users/me`
 
-### PR-F3 — App shell & navigation
+### PR-F3 — App shell & navigation ✅
 
 - Layout: fixed left sidebar (per the prototype — logo + org name with a switcher affordance, nav items `Dashboard` / `Tasks` / `Settings`, user profile card pinned to the bottom with a logout menu), main content area to its right
 - Route skeleton wired into React Router, wrapped in `ProtectedRoute`
 
 **Depends on:** `GET /api/users/me` (already integrated in PR-F2, reused here for the app bar)
 
-### PR-F4 — Organization settings screens
+### PR-F4 — Organization settings screens ✅
 
 - Inline "Invite team member" card (email field + role select + send button) above the members table, matching the prototype — shows an inline success state after sending rather than a separate confirmation screen
 - Members table: avatar, name, email, `RoleBadge`, joined date
@@ -136,14 +138,14 @@ No screens, no backend dependency.
 
 **Depends on:** `GET /api/organization`, `GET /api/organization/members`, `POST/GET/DELETE /api/organization/invitations`, `PATCH /api/organization/members/{id}/role`, `DELETE /api/organization/members/{id}`
 
-### PR-F5 — Accept-invitation flow
+### PR-F5 — Accept-invitation flow ✅
 
 - Public screen at `/accept-invitation?token=...`: name + password form, submits and logs the new user straight in
 - Handles expired/invalid token with a clear error state (no dead-end)
 
 **Depends on:** `POST /api/auth/accept-invitation`
 
-### PR-F6 — Task list screen
+### PR-F6 — Task list screen ✅
 
 - Table of tasks matching the prototype's columns: Title (+ project, if PR-N1 is in scope), Assignee (avatar + name), `StatusChip`, `PriorityLabel`, Due date
 - Filter pill group (`All` / `To Do` / `In Progress` / `Done`) plus a search input, both client-side over the fetched page for now
@@ -152,7 +154,7 @@ No screens, no backend dependency.
 
 **Depends on:** `GET /api/tasks`
 
-### PR-F7 — Task create/edit form
+### PR-F7 — Task create/edit form ✅
 
 - Create and edit modal (same form component, different submit handler) — centered dialog with backdrop blur, matching the prototype's New Task modal: title field, description textarea, then a 3-column row of Assignee / Priority / Due date, Cancel + primary submit button pair
 - Fields: title, description, status (edit only), priority select, assignee autocomplete (sourced from org members), due date picker
@@ -160,7 +162,7 @@ No screens, no backend dependency.
 
 **Depends on:** `POST /api/tasks`, `PUT /api/tasks/{id}`, `GET /api/organization/members` (assignee options)
 
-### PR-F8 — Task detail & comments
+### PR-F8 — Task detail & comments ✅
 
 - Dedicated route, two-column layout matching the prototype: left column has the title, status/priority/due-date summary line, description card, and the comment thread with an add-comment textarea; right column is a sticky metadata panel (Status, Priority, Assignee, Due Date) with Edit/Delete actions at the bottom
 - Delete comment (visible to the comment's author or an Admin)
@@ -168,7 +170,7 @@ No screens, no backend dependency.
 
 **Depends on:** `GET /api/tasks/{id}`, `GET/POST/DELETE /api/tasks/{taskId}/comments`, `DELETE /api/tasks/{id}`
 
-### PR-F9 — Dashboard screen
+### PR-F9 — Dashboard screen ✅
 
 - Greeting header (user's first name + current date + org name)
 - Three stat cards — To Do / In Progress / Completed counts, each clickable through to the Task List pre-filtered by that status
@@ -178,7 +180,7 @@ No screens, no backend dependency.
 
 **Depends on:** `GET /api/tasks` (same endpoint as PR-F6, just a smaller/filtered slice)
 
-### PR-F10 — UX polish
+### PR-F10 — UX polish ✅
 
 - Loading skeletons, empty states ("no tasks yet"), toast notifications (success/error) via MUI `Snackbar`
 - A generic error boundary + 404 route
@@ -186,7 +188,7 @@ No screens, no backend dependency.
 
 **Depends on:** nothing new — hardening pass across PR-F2 through PR-F9
 
-### PR-F11 — Playwright e2e setup & core flows
+### PR-F11 — Playwright e2e setup & core flows ✅
 
 - Playwright config, running against a locally-started build (or the deployed preview URL)
 - Fixtures: seed a fresh org/user per test run via the real API (no mocking — these are true end-to-end tests)
@@ -194,7 +196,7 @@ No screens, no backend dependency.
 
 **Depends on:** the full stack — run last, after PR-F10
 
-### PR-F12 — Vercel deployment config
+### PR-F12 — Vercel deployment config ✅
 
 - `vercel.json`: SPA rewrite (`/* → /index.html`) so React Router routes don't 404 on refresh
 - Environment variables configured per Vercel environment (Production / Preview)
@@ -202,7 +204,7 @@ No screens, no backend dependency.
 
 No new screens.
 
-### PR-F13 — GitHub Actions CI (frontend)
+### PR-F13 — GitHub Actions CI (frontend) ✅
 
 See [Section 5](#5-github-actions-cicd) below.
 
@@ -247,6 +249,8 @@ On merge to `main`:
 ## 6. Nice to Have
 
 Present in the design prototype but out of the core PR sequence above — pick these up post-MVP, once PR-F0–F13 (and their backend counterparts) have shipped. Each depends on its matching backend chunk in [`backend-plan.md`](./backend-plan.md#6-nice-to-have) shipping first.
+
+**Status: not started.** Neither NH-F1 nor NH-F2 has any code in `client/src` yet, and both are blocked on their backend counterparts.
 
 ### NH-F1 — Projects
 

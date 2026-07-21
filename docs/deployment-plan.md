@@ -25,7 +25,7 @@ Render's own free Postgres is deleted after 90 days. Neon's free tier has no exp
 
 ## 3. Backend — Render (free Web Service)
 
-`render.yaml` defines a Docker web service on the free plan, built from `server/Dockerfile`, health-checked at `/health`.
+`render.yaml` defines a Docker web service on the free plan, built from `server/Dockerfile`, health-checked at `/health`. `autoDeploy` is set to `false` — Render does not watch pushes itself. Deploys are instead triggered by `backend-ci.yml`'s `deploy` job, which only fires after `build-and-test` and `gitleaks` pass (see §7).
 
 1. Render dashboard → **New → Blueprint** → select the repo. Render reads `render.yaml` automatically.
 2. Fill in the env vars marked `sync: false`:
@@ -36,7 +36,15 @@ Render's own free Postgres is deleted after 90 days. Neon's free tier has no exp
    | `Jwt__Secret` | random secret, e.g. `openssl rand -base64 32` |
    | `Cors__AllowedOrigins` | Vercel URL from §4 (comes second — see §5) |
 
-3. Deploy. Confirm `https://<service>.onrender.com/health` returns healthy.
+3. Deploy manually once from the dashboard to get the initial build live. Confirm `https://<service>.onrender.com/health` returns healthy.
+4. Service → **Settings → Deploy Hook** → copy the URL. In the GitHub repo, add two Actions secrets:
+
+   | Secret | Value |
+   |---|---|
+   | `RENDER_DEPLOY_HOOK_URL` | the deploy hook URL from this step |
+   | `RENDER_HEALTH_URL` | the service's base URL, e.g. `https://<service>.onrender.com` |
+
+   Without these, `backend-ci.yml`'s `deploy` job fails on the next push to `main`.
 
 **Free-tier caveat:** the service spins down after 15 minutes idle and cold-starts (~30-50s) on the next request. Expected behavior, not a bug.
 
@@ -44,12 +52,21 @@ Render's own free Postgres is deleted after 90 days. Neon's free tier has no exp
 
 ## 4. Frontend — Vercel (free Hobby plan)
 
-`client/vercel.json` has the SPA rewrite (`/* → /index.html`) so React Router routes survive a refresh.
+`client/vercel.json` has the SPA rewrite (`/* → /index.html`) so React Router routes survive a refresh. It also sets `git.deploymentEnabled.main` to `false` — Vercel's GitHub integration still builds preview deployments for PRs/other branches, but won't auto-deploy `main` to Production on push. Production deploys are instead triggered by `frontend-ci.yml`'s `deploy` job, which only fires after `build-and-test` and `gitleaks` pass (see §7).
 
 1. Import the repo in Vercel, set **root directory** to `client/`
 2. Framework preset: Vite (auto-detected)
 3. Env var: `VITE_API_URL` = the Render backend URL from §3
-4. Deploy, copy the resulting `*.vercel.app` URL
+4. Deploy manually once from the dashboard to get the initial build live. Copy the resulting `*.vercel.app` URL.
+5. Project → **Settings → General** → copy the **Project ID**, and org/team → **Settings** → copy the **Team ID** (this is the org ID; for a personal account use the account ID shown there instead). Then **Account → Settings → Tokens** → create a token scoped to this project. In the GitHub repo, add three Actions secrets:
+
+   | Secret | Value |
+   |---|---|
+   | `VERCEL_TOKEN` | the token just created |
+   | `VERCEL_ORG_ID` | the Team/account ID |
+   | `VERCEL_PROJECT_ID` | the Project ID |
+
+   Without these, `frontend-ci.yml`'s `deploy` job fails on the next push to `main`.
 
 ---
 
@@ -71,4 +88,9 @@ Backend and frontend each need the other's URL, so this is necessarily a two-pas
 
 ## 7. Ongoing deploys
 
-Both Render and Vercel auto-deploy on push to `main` via their GitHub integrations — no extra Action step required. `backend-ci.yml` (PR-B12) and `frontend-ci.yml` (PR-F13) run independently on PRs as a merge gate; they don't drive the deploy itself unless later wired to gate it explicitly (see `backend-plan.md` §5).
+Both sides are now CI-gated the same way — neither platform's native GitHub integration is allowed to deploy `main` to production on its own:
+
+- **Backend:** `render.yaml` has `autoDeploy: false`. `backend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only on push to `main`, and only after both jobs pass — it then POSTs `RENDER_DEPLOY_HOOK_URL` and polls `RENDER_HEALTH_URL/health` until the new deploy is live.
+- **Frontend:** `client/vercel.json` has `git.deploymentEnabled.main: false`. `frontend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only on push to `main`, and only after both jobs pass — it then runs `vercel build --prod` + `vercel deploy --prebuilt --prod` using `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID`.
+
+In both cases a failing test, lint, type-check, or secret scan blocks the production deploy outright. PR branches still get Vercel preview deployments as before — only `main` → Production is gated.
