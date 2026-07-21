@@ -80,7 +80,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+if (app.Environment.IsProduction() && app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
 {
     using var migrationScope = app.Services.CreateScope();
     migrationScope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
