@@ -21,12 +21,47 @@ export interface TaskListResult {
   pageSize: number
 }
 
+export interface TaskDetail {
+  id: string
+  title: string
+  description: string | null
+  status: TaskStatus
+  priority: TaskPriority
+  assigneeId: string | null
+  dueDate: string | null
+  createdById: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface TaskListParams {
   page: number
   pageSize: number
 }
 
+export interface TaskFormPayload {
+  title: string
+  description?: string
+  priority: TaskPriority
+  assigneeId?: string
+  dueDate?: string
+}
+
+export interface UpdateTaskPayload extends TaskFormPayload {
+  status: TaskStatus
+}
+
 export async function getTasks(params: TaskListParams): Promise<TaskListResult> {
   const { data } = await apiClient.get<TaskListResult>('/api/tasks', { params })
+  return data
+}
+
+export async function createTask(payload: TaskFormPayload): Promise<TaskDetail> {
+  const { data } = await apiClient.post<TaskDetail>('/api/tasks', payload)
+  return data
+}
+
+export async function updateTask(id: string, payload: UpdateTaskPayload): Promise<TaskDetail> {
+  const { data } = await apiClient.put<TaskDetail>(`/api/tasks/${id}`, payload)
   return data
 }

@@ -11,6 +11,8 @@ import { PriorityLabel } from '@/components/PriorityLabel'
 import { StatusChip } from '@/components/StatusChip'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/useAuth'
+import { useMembersQuery } from '@/features/organization/organizationQueries'
+import { TaskFormModal } from './TaskFormModal'
 import { useTasksQuery } from './tasksQueries'
 
 const PAGE_SIZE = 20
@@ -36,8 +38,10 @@ export function TaskListScreen() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all')
   const [search, setSearch] = useState('')
+  const [createModalOpen, setCreateModalOpen] = useState(false)
 
   const tasksQuery = useTasksQuery({ page, pageSize: PAGE_SIZE })
+  const membersQuery = useMembersQuery()
 
   const filteredItems = useMemo(() => {
     const items = tasksQuery.data?.items ?? []
@@ -75,7 +79,9 @@ export function TaskListScreen() {
             {total} tasks · {user?.organizationName}
           </Typography>
         </Box>
-        <Button variant="contained">New task</Button>
+        <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
+          New task
+        </Button>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 2.25, flexWrap: 'wrap' }}>
@@ -212,6 +218,13 @@ export function TaskListScreen() {
           />
         </Box>
       )}
+
+      <TaskFormModal
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        members={membersQuery.data ?? []}
+        mode="create"
+      />
     </Box>
   )
 }
