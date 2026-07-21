@@ -7,7 +7,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
-import { extractErrorMessage } from '@/api/errors'
+import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import { LabeledField } from '@/components/LabeledField'
 import { useAuth } from './useAuth'
 import { acceptInvitationSchema, type AcceptInvitationFormValues } from './authSchemas'
@@ -33,6 +33,7 @@ export function AcceptInvitationScreen() {
       await acceptInvitation({ token, ...values })
       navigate('/tasks', { replace: true })
     } catch (error) {
+      applyFieldErrors(error, form.setError)
       setErrorMessage(extractErrorMessage(error, 'This invitation link is invalid or has expired'))
     }
   }

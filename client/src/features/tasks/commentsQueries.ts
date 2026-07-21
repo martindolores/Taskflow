@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as commentsApi from '@/api/commentsApi'
+import { showToast } from '@/components/toast'
 
 export const commentKeys = {
   list: (taskId: string) => ['tasks', taskId, 'comments'] as const,
@@ -16,6 +17,7 @@ export function useCreateCommentMutation(taskId: string) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (body: string) => commentsApi.createComment(taskId, body),
+    meta: { suppressErrorToast: true },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: commentKeys.list(taskId) })
     },
@@ -28,6 +30,7 @@ export function useDeleteCommentMutation(taskId: string) {
     mutationFn: (commentId: string) => commentsApi.deleteComment(taskId, commentId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: commentKeys.list(taskId) })
+      showToast('Comment deleted')
     },
   })
 }

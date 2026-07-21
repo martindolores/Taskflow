@@ -12,7 +12,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { extractErrorMessage } from '@/api/errors'
+import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import type { TaskDetail } from '@/api/tasksApi'
 import type { Member } from '@/api/organizationApi'
 import { LabeledField } from '@/components/LabeledField'
@@ -50,6 +50,7 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -81,8 +82,8 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
         await createTask.mutateAsync(payload)
       }
       onClose()
-    } catch {
-      // surfaced via mutation.isError below
+    } catch (error) {
+      applyFieldErrors(error, setError)
     }
   }
 

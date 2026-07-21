@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import CircularProgress from '@mui/material/CircularProgress'
 import Pagination from '@mui/material/Pagination'
 import Paper from '@mui/material/Paper'
+import Skeleton from '@mui/material/Skeleton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import type { TaskStatus } from '@/api/tasksApi'
@@ -154,13 +154,31 @@ export function TaskListScreen() {
         </Box>
 
         {tasksQuery.isLoading ? (
-          <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress size={22} />
-          </Box>
+          Array.from({ length: 6 }).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: gridColumns,
+                padding: '13px 18px',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Skeleton variant="text" width="70%" />
+              <Skeleton variant="text" width="60%" />
+              <Skeleton variant="rounded" width={64} height={22} />
+              <Skeleton variant="text" width="50%" />
+              <Skeleton variant="text" width="60%" />
+            </Box>
+          ))
         ) : filteredItems.length === 0 ? (
           <Box sx={{ p: '22px' }}>
             <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-              No tasks found.
+              {total === 0
+                ? 'No tasks yet — create your first task to get started.'
+                : 'No tasks match your filters.'}
             </Typography>
           </Box>
         ) : (

@@ -5,13 +5,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Paper from '@mui/material/Paper'
+import Skeleton from '@mui/material/Skeleton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { extractErrorMessage } from '@/api/errors'
@@ -90,14 +90,22 @@ export function TaskDetailScreen() {
       await deleteTask.mutateAsync(taskId)
       navigate('/tasks')
     } catch {
-      setDeleteConfirmOpen(false)
+      // surfaced via the global error toast; keep the confirm dialog open to retry
     }
   }
 
   if (taskQuery.isLoading) {
     return (
-      <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress size={22} />
+      <Box sx={{ p: '36px 40px', maxWidth: 900 }}>
+        <Skeleton variant="text" width={120} height={32} sx={{ mb: 3 }} />
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 248px', gap: '22px' }}>
+          <Box>
+            <Skeleton variant="text" width="70%" height={40} sx={{ mb: 2 }} />
+            <Skeleton variant="rounded" height={110} sx={{ mb: 2.25 }} />
+            <Skeleton variant="rounded" height={160} />
+          </Box>
+          <Skeleton variant="rounded" height={340} />
+        </Box>
       </Box>
     )
   }
@@ -157,8 +165,13 @@ export function TaskDetailScreen() {
             </Typography>
 
             {commentsQuery.isLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-                <CircularProgress size={20} />
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2.75 }}>
+                {Array.from({ length: 2 }).map((_, index) => (
+                  <Box key={index} sx={{ display: 'flex', gap: 1.25 }}>
+                    <Skeleton variant="circular" width={29} height={29} />
+                    <Skeleton variant="rounded" height={60} sx={{ flex: 1 }} />
+                  </Box>
+                ))}
               </Box>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2.75 }}>

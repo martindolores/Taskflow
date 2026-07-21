@@ -8,7 +8,7 @@ import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
 import Typography from '@mui/material/Typography'
-import { extractErrorMessage } from '@/api/errors'
+import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import { LabeledField } from '@/components/LabeledField'
 import { useAuth } from './useAuth'
 import {
@@ -47,6 +47,7 @@ export function AuthScreen() {
       await login(values)
       navigate('/tasks', { replace: true })
     } catch (error) {
+      applyFieldErrors(error, signInForm.setError)
       setErrorMessage(extractErrorMessage(error, 'Invalid email or password'))
     }
   }
@@ -57,6 +58,7 @@ export function AuthScreen() {
       await registerAccount(values)
       navigate('/tasks', { replace: true })
     } catch (error) {
+      applyFieldErrors(error, registerForm.setError)
       setErrorMessage(extractErrorMessage(error, 'Could not create your account'))
     }
   }

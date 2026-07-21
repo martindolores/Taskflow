@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as tasksApi from '@/api/tasksApi'
 import type { TaskFormPayload, TaskListParams, UpdateTaskPayload } from '@/api/tasksApi'
+import { showToast } from '@/components/toast'
 
 export const taskKeys = {
   lists: ['tasks', 'list'] as const,
@@ -27,8 +28,10 @@ export function useCreateTaskMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: TaskFormPayload) => tasksApi.createTask(payload),
+    meta: { suppressErrorToast: true },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: taskKeys.lists })
+      showToast('Task created')
     },
   })
 }
@@ -38,9 +41,11 @@ export function useUpdateTaskMutation() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdateTaskPayload }) =>
       tasksApi.updateTask(id, payload),
+    meta: { suppressErrorToast: true },
     onSuccess: (_data, { id }) => {
       void queryClient.invalidateQueries({ queryKey: taskKeys.lists })
       void queryClient.invalidateQueries({ queryKey: taskKeys.detail(id) })
+      showToast('Task updated')
     },
   })
 }
@@ -51,6 +56,7 @@ export function useDeleteTaskMutation() {
     mutationFn: (id: string) => tasksApi.deleteTask(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: taskKeys.lists })
+      showToast('Task deleted')
     },
   })
 }

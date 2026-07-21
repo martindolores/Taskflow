@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as organizationApi from '@/api/organizationApi'
 import type { CreateInvitationPayload } from '@/api/organizationApi'
 import type { UserRole } from '@/api/authApi'
+import { showToast } from '@/components/toast'
 
 export const organizationKeys = {
   detail: ['organization', 'detail'] as const,
@@ -29,6 +30,7 @@ export function useCreateInvitationMutation() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (payload: CreateInvitationPayload) => organizationApi.createInvitation(payload),
+    meta: { suppressErrorToast: true },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.invitations })
     },
@@ -41,6 +43,7 @@ export function useRevokeInvitationMutation() {
     mutationFn: (id: string) => organizationApi.revokeInvitation(id),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.invitations })
+      showToast('Invitation revoked')
     },
   })
 }
@@ -52,6 +55,7 @@ export function useUpdateMemberRoleMutation() {
       organizationApi.updateMemberRole(userId, role),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.members })
+      showToast('Role updated')
     },
   })
 }
@@ -62,6 +66,7 @@ export function useDeactivateMemberMutation() {
     mutationFn: (userId: string) => organizationApi.deactivateMember(userId),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.members })
+      showToast('Member removed')
     },
   })
 }

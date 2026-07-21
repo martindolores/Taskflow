@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -13,8 +12,9 @@ import DialogTitle from '@mui/material/DialogTitle'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Select from '@mui/material/Select'
+import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
-import { extractErrorMessage } from '@/api/errors'
+import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import type { UserRole } from '@/api/authApi'
 import type { Member } from '@/api/organizationApi'
 import { LabeledField } from '@/components/LabeledField'
@@ -71,8 +71,8 @@ export function OrganizationSettingsScreen() {
       await createInvitation.mutateAsync(values)
       inviteForm.reset()
       setInviteSuccess(true)
-    } catch {
-      // surfaced via createInvitation.isError/error in the render below
+    } catch (error) {
+      applyFieldErrors(error, inviteForm.setError)
     }
   }
 
@@ -198,9 +198,27 @@ export function OrganizationSettingsScreen() {
         </Box>
 
         {membersQuery.isLoading ? (
-          <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-            <CircularProgress size={22} />
-          </Box>
+          Array.from({ length: 4 }).map((_, index) => (
+            <Box
+              key={index}
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: memberGridColumns(isAdmin),
+                padding: '12px 22px',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                <Skeleton variant="circular" width={31} height={31} />
+                <Skeleton variant="text" width="60%" />
+              </Box>
+              <Skeleton variant="text" width="70%" />
+              <Skeleton variant="text" width={80} />
+              <Skeleton variant="text" width={60} />
+            </Box>
+          ))
         ) : (
           <>
             <Box
@@ -296,9 +314,22 @@ export function OrganizationSettingsScreen() {
           </Box>
 
           {invitationsQuery.isLoading ? (
-            <Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
-              <CircularProgress size={22} />
-            </Box>
+            Array.from({ length: 2 }).map((_, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  padding: '12px 22px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                }}
+              >
+                <Skeleton variant="text" width="40%" sx={{ flex: 1 }} />
+                <Skeleton variant="rounded" width={60} height={20} />
+                <Skeleton variant="text" width={110} />
+              </Box>
+            ))
           ) : pendingInvitations.length === 0 ? (
             <Box sx={{ p: '22px' }}>
               <Typography variant="body2" sx={{ color: 'text.disabled' }}>

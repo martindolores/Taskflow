@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import Paper from '@mui/material/Paper'
+import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
 import type { TaskListItem, TaskStatus } from '@/api/tasksApi'
 import { StatusChip } from '@/components/StatusChip'
@@ -98,17 +98,21 @@ export function DashboardScreen() {
             <Typography variant="overline" sx={{ display: 'block', mb: 1.75 }}>
               {card.label}
             </Typography>
-            <Typography
-              sx={{
-                fontSize: 36,
-                fontWeight: 600,
-                letterSpacing: '-2px',
-                mb: 0.375,
-                color: card.color ?? 'text.primary',
-              }}
-            >
-              {isLoading ? '—' : counts[card.status]}
-            </Typography>
+            {isLoading ? (
+              <Skeleton variant="text" width={48} height={44} sx={{ mb: 0.375 }} />
+            ) : (
+              <Typography
+                sx={{
+                  fontSize: 36,
+                  fontWeight: 600,
+                  letterSpacing: '-2px',
+                  mb: 0.375,
+                  color: card.color ?? 'text.primary',
+                }}
+              >
+                {counts[card.status]}
+              </Typography>
+            )}
             <Typography sx={{ fontSize: 12, color: 'text.disabled' }}>{card.caption}</Typography>
           </Paper>
         ))}
@@ -128,8 +132,10 @@ export function DashboardScreen() {
         </Box>
 
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-            <CircularProgress size={20} />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} variant="rounded" height={44} />
+            ))}
           </Box>
         ) : openTasks.length === 0 ? (
           <Typography variant="body2" sx={{ color: 'text.disabled' }}>

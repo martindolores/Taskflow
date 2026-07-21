@@ -42,7 +42,7 @@ src/
 - **`src/theme/theme.ts`** — the dark MUI theme. Custom, non-standard palette tokens (`surface.input`, `border.default`/`border.hover`, `nav.activeText`, `avatarGradient`) are added via `declare module '@mui/material/styles'` augmentation in the same file — extend that block rather than reaching for raw hex values in components.
 - **`src/api/client.ts`** — the shared `apiClient` Axios instance. Request interceptor attaches the JWT from `tokenStorage`; response interceptor does a single silent refresh via `POST /api/auth/refresh` on a 401 (concurrent 401s share one in-flight refresh via a module-level promise), retries the original request once, and on refresh failure clears tokens and hard-redirects to `/login`. Requests to `/api/auth/*` (login, register, refresh, logout) are exempt from this — a 401 there (e.g. bad login credentials) just rejects normally so the caller can show an inline error, instead of triggering a refresh attempt and hard-redirect. Use `apiClient` for all backend calls — don't instantiate a second Axios instance, and don't call the refresh endpoint through `apiClient` itself (it uses plain `axios` to avoid recursing into its own interceptor).
 - **`src/api/tokenStorage.ts`** — thin `localStorage` wrapper (`taskflow.accessToken` / `taskflow.refreshToken`). `AuthContext` (PR-F2) will build on top of this rather than reading `localStorage` directly elsewhere.
-- **`src/api/queryClient.ts`** — the single `QueryClient` instance, provided at the root in `App.tsx`.
+- **`src/api/queryClient.ts`** — the single `QueryClient` instance, provided at the root in `App.tsx`. Its `QueryCache`/`MutationCache` show an error toast (via `src/components/toast.ts`) for any query/mutation failure by default; pass `meta: { suppressErrorToast: true }` on a mutation that already renders its own inline `Alert` (see `TaskFormModal`, `OrganizationSettingsScreen`'s invite form) to avoid double-reporting the same error.
 
 ## Key files
 
@@ -52,7 +52,8 @@ src/
 | Token storage | `src/api/tokenStorage.ts` |
 | Query client | `src/api/queryClient.ts` |
 | Per-resource API modules | `src/api/{authApi,tasksApi,commentsApi,organizationApi}.ts` |
-| Shared API error handling | `src/api/errors.ts` |
+| Shared API error handling (`extractErrorMessage`, `applyFieldErrors`) | `src/api/errors.ts` |
+| Toast bus + host (`showToast`, mounted once in `App.tsx`) | `src/components/{toast,ToastHost}.ts(x)` |
 | MUI theme + palette augmentation | `src/theme/theme.ts` |
 | Auth state | `src/features/auth/AuthContext.tsx`, `context.ts`, `useAuth.ts` |
 | Auth screens | `src/features/auth/{AuthScreen,AcceptInvitationScreen}.tsx` |
@@ -60,7 +61,7 @@ src/
 | Task queries/schemas | `src/features/tasks/{tasksQueries,commentsQueries,taskSchemas}.ts` |
 | Organization settings | `src/features/organization/OrganizationSettingsScreen.tsx` |
 | Shared dumb components | `src/components/{LabeledField,PriorityLabel,RoleBadge,StatusChip,UserAvatar}.tsx` |
-| Routing/guards | `src/routes/{AppShell,ProtectedRoute,PublicRoute,PlaceholderPage}.tsx` |
+| Routing/guards | `src/routes/{AppShell,ProtectedRoute,PublicRoute,ErrorBoundary,NotFoundScreen}.tsx` |
 | App entry | `src/App.tsx` |
 | Env typing | `src/vite-env.d.ts` |
 
