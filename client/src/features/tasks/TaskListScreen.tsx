@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -35,6 +36,7 @@ function formatDueDate(dueDate: string | null): string {
 
 export function TaskListScreen() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all')
   const [search, setSearch] = useState('')
@@ -155,12 +157,15 @@ export function TaskListScreen() {
           filteredItems.map((task) => (
             <Box
               key={task.id}
+              onClick={() => navigate(`/tasks/${task.id}`)}
               sx={{
                 display: 'grid',
                 gridTemplateColumns: gridColumns,
                 padding: '13px 18px',
                 borderBottom: '1px solid rgba(255,255,255,0.04)',
                 alignItems: 'center',
+                cursor: 'pointer',
+                '&:hover': { bgcolor: 'rgba(255,255,255,0.025)' },
               }}
             >
               <Typography

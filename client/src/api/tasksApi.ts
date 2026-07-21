@@ -65,3 +65,12 @@ export async function updateTask(id: string, payload: UpdateTaskPayload): Promis
   const { data } = await apiClient.put<TaskDetail>(`/api/tasks/${id}`, payload)
   return data
 }
+
+export async function getTask(id: string): Promise<TaskDetail> {
+  const { data } = await apiClient.get<TaskDetail>(`/api/tasks/${id}`)
+  return data
+}
+
+export async function deleteTask(id: string): Promise<void> {
+  await apiClient.delete(`/api/tasks/${id}`)
+}

@@ -8,6 +8,7 @@ import { AcceptInvitationScreen } from '@/features/auth/AcceptInvitationScreen'
 import { AuthProvider } from '@/features/auth/AuthContext'
 import { AuthScreen } from '@/features/auth/AuthScreen'
 import { OrganizationSettingsScreen } from '@/features/organization/OrganizationSettingsScreen'
+import { TaskDetailScreen } from '@/features/tasks/TaskDetailScreen'
 import { TaskListScreen } from '@/features/tasks/TaskListScreen'
 import { AppShell } from '@/routes/AppShell'
 import { PlaceholderPage } from '@/routes/PlaceholderPage'
@@ -31,6 +32,7 @@ function App() {
                 <Route element={<AppShell />}>
                   <Route path="/dashboard" element={<PlaceholderPage title="Dashboard" />} />
                   <Route path="/tasks" element={<TaskListScreen />} />
+                  <Route path="/tasks/:id" element={<TaskDetailScreen />} />
                   <Route path="/settings" element={<OrganizationSettingsScreen />} />
                 </Route>
               </Route>
