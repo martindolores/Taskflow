@@ -38,6 +38,13 @@ public static class AuthEndpoints
             })
             .AddEndpointFilter<ValidationFilter<LogoutRequest>>();
 
+        group.MapPost("/accept-invitation", async (AcceptInvitationRequest request, IAuthService authService, CancellationToken cancellationToken) =>
+            {
+                var response = await authService.AcceptInvitationAsync(request, cancellationToken);
+                return Results.Ok(response);
+            })
+            .AddEndpointFilter<ValidationFilter<AcceptInvitationRequest>>();
+
         return app;
     }
 }

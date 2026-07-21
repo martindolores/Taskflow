@@ -57,7 +57,7 @@ public sealed class AuthService(
         var email = request.Email.Trim().ToLowerInvariant();
         var user = await db.Users.IgnoreQueryFilters().SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
 
-        if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
+        if (user is null || user.Status == UserStatus.Deactivated || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
             throw new InvalidCredentialsException();
         }
@@ -88,6 +88,52 @@ public sealed class AuthService(
         await db.SaveChangesAsync(cancellationToken);
 
         return new RefreshTokenResponse(accessToken, refreshToken);
+    }
+
+    public async Task<LoginResponse> AcceptInvitationAsync(AcceptInvitationRequest request, CancellationToken cancellationToken)
+    {
+        var invitation = await db.Invitations
+            .IgnoreQueryFilters()
+            .SingleOrDefaultAsync(i => i.Token == request.Token, cancellationToken);
+
+        var isValid = invitation is { Status: InvitationStatus.Pending } && invitation.ExpiresAt > DateTime.UtcNow;
+
+        if (!isValid)
+        {
+            throw new InvalidInvitationException();
+        }
+
+        var email = invitation!.Email;
+
+        if (await db.Users.IgnoreQueryFilters().AnyAsync(u => u.Email == email, cancellationToken))
+        {
+            throw new EmailAlreadyInUseException(email);
+        }
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = invitation.OrganizationId,
+            Email = email,
+            PasswordHash = passwordHasher.Hash(request.Password),
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Role = invitation.Role,
+            Status = UserStatus.Active,
+        };
+
+        invitation.Status = InvitationStatus.Accepted;
+
+        db.Users.Add(user);
+
+        var (accessToken, refreshToken) = IssueTokens(user);
+
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new LoginResponse(
+            accessToken,
+            refreshToken,
+            new AuthenticatedUser(user.Id, user.Email, user.FirstName, user.LastName, user.Role, user.OrganizationId));
     }
 
     public async Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken)

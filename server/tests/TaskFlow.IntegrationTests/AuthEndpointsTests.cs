@@ -1,9 +1,15 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth.Dtos;
+using TaskFlow.Application.Organizations.Dtos;
+using TaskFlow.Domain.Enums;
+using TaskFlow.Infrastructure.Persistence;
 
 namespace TaskFlow.IntegrationTests;
 
@@ -167,5 +173,80 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         var response = await client.PostAsJsonAsync("/api/auth/logout", new LogoutRequest("not-a-real-token"));
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    private async Task<(HttpClient AdminClient, Guid InvitationId, string Email)> InviteMemberAsync()
+    {
+        var adminClient = factory.CreateClient();
+        var admin = await RegisterAsync(adminClient);
+        adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", admin.AccessToken);
+
+        var email = UniqueEmail();
+        var response = await adminClient.PostAsJsonAsync("/api/organization/invitations", new CreateInvitationRequest(email, UserRole.Member));
+        response.EnsureSuccessStatusCode();
+        var invitation = (await response.Content.ReadFromJsonAsync<InvitationResponse>(JsonOptions))!;
+
+        return (adminClient, invitation.Id, email);
+    }
+
+    private async Task<string> ReadInvitationTokenAsync(Guid invitationId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var invitation = await db.Invitations.IgnoreQueryFilters().SingleAsync(i => i.Id == invitationId);
+        return invitation.Token;
+    }
+
+    [Fact]
+    public async Task AcceptInvitation_WithValidToken_CreatesUserAndReturnsTokens()
+    {
+        var (_, invitationId, email) = await InviteMemberAsync();
+        var token = await ReadInvitationTokenAsync(invitationId);
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest(token, "correct-horse-battery", "New", "Hire"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions);
+        Assert.NotNull(body);
+        Assert.Equal(email, body!.User.Email);
+        Assert.Equal("Member", body.User.Role.ToString());
+        Assert.False(string.IsNullOrWhiteSpace(body.AccessToken));
+    }
+
+    [Fact]
+    public async Task AcceptInvitation_WithUnknownToken_ReturnsBadRequest()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest("not-a-real-token", "correct-horse-battery", "New", "Hire"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AcceptInvitation_AfterAlreadyAccepted_ReturnsBadRequest()
+    {
+        var (_, invitationId, _) = await InviteMemberAsync();
+        var token = await ReadInvitationTokenAsync(invitationId);
+        var client = factory.CreateClient();
+        await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest(token, "correct-horse-battery", "New", "Hire"));
+
+        var response = await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest(token, "correct-horse-battery", "New", "Hire"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task AcceptInvitation_AfterRevoked_ReturnsBadRequest()
+    {
+        var (adminClient, invitationId, _) = await InviteMemberAsync();
+        await adminClient.DeleteAsync($"/api/organization/invitations/{invitationId}");
+        var token = await ReadInvitationTokenAsync(invitationId);
+        var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest(token, "correct-horse-battery", "New", "Hire"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }

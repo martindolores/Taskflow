@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.Auth.Exceptions;
+using TaskFlow.Application.Organizations.Exceptions;
 
 namespace TaskFlow.Api.Middleware;
 
@@ -50,6 +51,10 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         EmailAlreadyInUseException => (StatusCodes.Status409Conflict, exception.Message),
         InvalidCredentialsException => (StatusCodes.Status401Unauthorized, exception.Message),
         InvalidRefreshTokenException => (StatusCodes.Status401Unauthorized, exception.Message),
+        InvalidInvitationException => (StatusCodes.Status400BadRequest, exception.Message),
+        InvitationAlreadyPendingException => (StatusCodes.Status409Conflict, exception.Message),
+        InvitationNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+        MemberNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
         _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred."),
     };
 }

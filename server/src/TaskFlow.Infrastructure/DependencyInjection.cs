@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Common;
+using TaskFlow.Application.Organizations;
 using TaskFlow.Application.Users;
 using TaskFlow.Infrastructure.Auth;
+using TaskFlow.Infrastructure.Organizations;
 using TaskFlow.Infrastructure.Persistence;
 using TaskFlow.Infrastructure.Users;
 
@@ -26,6 +28,7 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IOrganizationService, OrganizationService>();
 
         return services;
     }

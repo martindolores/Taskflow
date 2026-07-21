@@ -11,4 +11,6 @@ public interface IAuthService
     Task<RefreshTokenResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken);
 
     Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken);
+
+    Task<LoginResponse> AcceptInvitationAsync(AcceptInvitationRequest request, CancellationToken cancellationToken);
 }
