@@ -6,6 +6,7 @@ services:
     dockerContext: ./server
     plan: free
     healthCheckPath: /health
+    autoDeploy: false
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
