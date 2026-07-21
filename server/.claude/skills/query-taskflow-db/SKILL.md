@@ -58,7 +58,7 @@ Drops into an interactive `psql` shell (omit `-T` since a TTY is attached). `\q`
 ## Gotchas
 
 - **No host `psql`.** Don't reach for a locally installed `psql` client — this environment doesn't have one; everything goes through `docker compose exec` into the container, which does have it (bundled with the `postgres:16-alpine` image).
-- **This is the docker-compose Postgres, not the test database.** Integration tests (`dotnet test`) spin up their own ephemeral Postgres via Testcontainers — querying this instance won't show test data, and vice versa.
+- **Integration tests (`dotnet test`) run against this same docker-compose Postgres** — there's no separate ephemeral test database. Test data they insert (e.g. registered users) persists here afterward.
 - **Database currently empty except migrations history** — as of this writing all app tables have 0 rows (`__EFMigrationsHistory` has 1, tracking the applied migration). Don't be surprised by empty result sets; it means no seed data, not a broken query.
 
 ## Troubleshooting
