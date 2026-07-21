@@ -1,18 +1,13 @@
 import Box from '@mui/material/Box'
 
-function initials(firstName: string, lastName: string): string {
-  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase()
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  const first = parts[0]?.[0] ?? ''
+  const last = parts.length > 1 ? (parts[parts.length - 1][0] ?? '') : ''
+  return `${first}${last}`.toUpperCase()
 }
 
-export function UserAvatar({
-  firstName,
-  lastName,
-  size = 31,
-}: {
-  firstName: string
-  lastName: string
-  size?: number
-}) {
+export function UserAvatar({ name, size = 31 }: { name: string; size?: number }) {
   return (
     <Box
       sx={{
@@ -28,7 +23,7 @@ export function UserAvatar({
         flexShrink: 0,
       }}
     >
-      {initials(firstName, lastName)}
+      {initials(name)}
     </Box>
   )
 }

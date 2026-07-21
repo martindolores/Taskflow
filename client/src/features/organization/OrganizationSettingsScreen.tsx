@@ -240,7 +240,7 @@ export function OrganizationSettingsScreen() {
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                    <UserAvatar firstName={member.firstName} lastName={member.lastName} />
+                    <UserAvatar name={`${member.firstName} ${member.lastName}`} />
                     <Typography sx={{ fontSize: 13.5, fontWeight: 500 }}>
                       {member.firstName} {member.lastName}
                     </Typography>
