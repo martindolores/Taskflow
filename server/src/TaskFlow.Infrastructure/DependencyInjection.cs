@@ -3,8 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Common;
+using TaskFlow.Application.Users;
 using TaskFlow.Infrastructure.Auth;
 using TaskFlow.Infrastructure.Persistence;
+using TaskFlow.Infrastructure.Users;
 
 namespace TaskFlow.Infrastructure;
 
@@ -23,6 +25,7 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }

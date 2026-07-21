@@ -18,7 +18,7 @@ public sealed class AuthService(
     {
         var email = request.Email.Trim().ToLowerInvariant();
 
-        if (await db.Users.AnyAsync(u => u.Email == email, cancellationToken))
+        if (await db.Users.IgnoreQueryFilters().AnyAsync(u => u.Email == email, cancellationToken))
         {
             throw new EmailAlreadyInUseException(email);
         }
@@ -55,7 +55,7 @@ public sealed class AuthService(
     public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
         var email = request.Email.Trim().ToLowerInvariant();
-        var user = await db.Users.SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+        var user = await db.Users.IgnoreQueryFilters().SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
 
         if (user is null || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
@@ -109,6 +109,7 @@ public sealed class AuthService(
         var tokenHash = jwtTokenService.HashRefreshToken(rawToken);
 
         var refreshToken = await db.RefreshTokens
+            .IgnoreQueryFilters()
             .Include(r => r.User)
             .SingleOrDefaultAsync(r => r.TokenHash == tokenHash, cancellationToken);
 

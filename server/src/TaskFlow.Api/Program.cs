@@ -9,6 +9,7 @@ using TaskFlow.Api.Middleware;
 using TaskFlow.Api.Services;
 using TaskFlow.Application.Auth.Validators;
 using TaskFlow.Application.Common;
+using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure;
 using TaskFlow.Infrastructure.Auth;
 
@@ -29,6 +30,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+builder.Services.AddScoped<ICurrentTenantService, CurrentTenantService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
 
@@ -54,7 +56,8 @@ builder.Services
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminOnly", policy => policy.RequireRole(nameof(UserRole.Admin)));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -94,6 +97,7 @@ app.MapGet("/", () => Results.Ok());
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 app.Run();
 
