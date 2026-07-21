@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.claude/
+docker-compose.yml
+README.md
+CLAUDE.md

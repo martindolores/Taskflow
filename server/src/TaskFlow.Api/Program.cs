@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using TaskFlow.Api.Endpoints;
@@ -12,6 +13,7 @@ using TaskFlow.Application.Common;
 using TaskFlow.Domain.Enums;
 using TaskFlow.Infrastructure;
 using TaskFlow.Infrastructure.Auth;
+using TaskFlow.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -77,6 +79,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+{
+    using var migrationScope = app.Services.CreateScope();
+    migrationScope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+}
 
 app.UseSerilogRequestLogging();
 
