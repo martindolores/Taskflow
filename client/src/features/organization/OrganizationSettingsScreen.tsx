@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography'
 import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import type { UserRole } from '@/api/authApi'
 import type { Member } from '@/api/organizationApi'
+import { showToast } from '@/components/toast'
 import { LabeledField } from '@/components/LabeledField'
 import { RoleBadge } from '@/components/RoleBadge'
 import { UserAvatar } from '@/components/UserAvatar'
@@ -42,6 +43,19 @@ function formatExpiry(expiresAt: string): string {
   return new Date(expiresAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
+function buildInviteLink(token: string): string {
+  return `${window.location.origin}/accept-invitation?token=${token}`
+}
+
+async function copyInviteLink(token: string) {
+  try {
+    await navigator.clipboard.writeText(buildInviteLink(token))
+    showToast('Invite link copied to clipboard')
+  } catch {
+    showToast('Could not copy the invite link', 'error')
+  }
+}
+
 const memberGridColumns = (isAdmin: boolean) =>
   isAdmin ? '1fr 1fr 130px 110px 90px' : '1fr 1fr 130px 110px'
 
@@ -58,7 +72,7 @@ export function OrganizationSettingsScreen() {
   const updateMemberRole = useUpdateMemberRoleMutation()
   const deactivateMember = useDeactivateMemberMutation()
 
-  const [inviteSuccess, setInviteSuccess] = useState(false)
+  const [inviteToken, setInviteToken] = useState<string | null>(null)
   const [memberToRemove, setMemberToRemove] = useState<Member | null>(null)
 
   const inviteForm = useForm<InviteMemberFormValues>({
@@ -68,9 +82,9 @@ export function OrganizationSettingsScreen() {
 
   async function onInvite(values: InviteMemberFormValues) {
     try {
-      await createInvitation.mutateAsync(values)
+      const invitation = await createInvitation.mutateAsync(values)
       inviteForm.reset()
-      setInviteSuccess(true)
+      setInviteToken(invitation.token)
     } catch (error) {
       applyFieldErrors(error, inviteForm.setError)
     }
@@ -109,10 +123,10 @@ export function OrganizationSettingsScreen() {
             Invite team member
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.disabled', mb: 2.25 }}>
-            New members will receive an email invitation to join {orgName}.
+            Create an invite link to share with the new member so they can join {orgName}.
           </Typography>
 
-          {inviteSuccess ? (
+          {inviteToken ? (
             <Box
               sx={{
                 display: 'flex',
@@ -124,7 +138,7 @@ export function OrganizationSettingsScreen() {
                 padding: '11px 14px',
               }}
             >
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
                 <circle cx="8" cy="8" r="7" fill="#22c55e" opacity={0.15} />
                 <path
                   d="M5 8l2.2 2.2 3.8-4"
@@ -134,11 +148,26 @@ export function OrganizationSettingsScreen() {
                   strokeLinejoin="round"
                 />
               </svg>
-              <Typography variant="body2" sx={{ color: '#22c55e', flex: 1 }}>
-                Invitation sent successfully.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#22c55e',
+                  flex: 1,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Invitation created — share this link: {buildInviteLink(inviteToken)}
               </Typography>
               <Button
-                onClick={() => setInviteSuccess(false)}
+                onClick={() => void copyInviteLink(inviteToken)}
+                sx={{ fontSize: 12, minWidth: 0, p: 0, whiteSpace: 'nowrap' }}
+              >
+                Copy link
+              </Button>
+              <Button
+                onClick={() => setInviteToken(null)}
                 sx={{ color: 'text.disabled', fontSize: 12, minWidth: 0, p: 0 }}
               >
                 Dismiss
@@ -353,6 +382,9 @@ export function OrganizationSettingsScreen() {
                 <Typography sx={{ fontSize: 12, color: 'text.disabled', width: 110 }}>
                   Expires {formatExpiry(invitation.expiresAt)}
                 </Typography>
+                <Button onClick={() => void copyInviteLink(invitation.token)} sx={{ fontSize: 12 }}>
+                  Copy link
+                </Button>
                 <Button
                   onClick={() => void revokeInvitation.mutateAsync(invitation.id).catch(() => {})}
                   sx={{ fontSize: 12, color: 'error.main' }}

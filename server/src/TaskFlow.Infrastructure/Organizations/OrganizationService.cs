@@ -64,7 +64,7 @@ public sealed class OrganizationService(AppDbContext db, ICurrentUserService cur
     public async Task<IReadOnlyList<InvitationResponse>> GetInvitationsAsync(CancellationToken cancellationToken) =>
         await db.Invitations
             .OrderByDescending(i => i.CreatedAt)
-            .Select(i => new InvitationResponse(i.Id, i.Email, i.Role, i.Status, i.ExpiresAt))
+            .Select(i => new InvitationResponse(i.Id, i.Email, i.Role, i.Status, i.ExpiresAt, i.Token))
             .ToListAsync(cancellationToken);
 
     public async Task RevokeInvitationAsync(Guid invitationId, CancellationToken cancellationToken)
@@ -112,5 +112,5 @@ public sealed class OrganizationService(AppDbContext db, ICurrentUserService cur
     }
 
     private static InvitationResponse ToInvitationResponse(Invitation invitation) =>
-        new(invitation.Id, invitation.Email, invitation.Role, invitation.Status, invitation.ExpiresAt);
+        new(invitation.Id, invitation.Email, invitation.Role, invitation.Status, invitation.ExpiresAt, invitation.Token);
 }

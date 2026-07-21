@@ -26,6 +26,7 @@ export interface Invitation {
   role: UserRole
   status: InvitationStatus
   expiresAt: string
+  token: string
 }
 
 export interface CreateInvitationPayload {

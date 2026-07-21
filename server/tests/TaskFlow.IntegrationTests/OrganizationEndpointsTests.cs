@@ -119,6 +119,8 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
         Assert.Equal(email, body!.Email);
         Assert.Equal(UserRole.Member, body.Role);
         Assert.Equal(InvitationStatus.Pending, body.Status);
+        Assert.False(string.IsNullOrEmpty(body.Token));
+        Assert.Equal(await ReadTokenFromDbAsync(body.Id), body.Token);
     }
 
     [Fact]
@@ -181,7 +183,8 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var invitations = await response.Content.ReadFromJsonAsync<List<InvitationResponse>>(JsonOptions);
         Assert.NotNull(invitations);
-        Assert.Contains(invitations!, i => i.Email == email);
+        var found = Assert.Single(invitations!, i => i.Email == email);
+        Assert.False(string.IsNullOrEmpty(found.Token));
     }
 
     [Fact]
