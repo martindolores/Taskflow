@@ -48,3 +48,15 @@ export async function getCurrentUser(): Promise<CurrentUser> {
   const { data } = await apiClient.get<CurrentUser>('/api/users/me')
   return data
 }
+
+export interface AcceptInvitationPayload {
+  token: string
+  password: string
+  firstName: string
+  lastName: string
+}
+
+export async function acceptInvitation(payload: AcceptInvitationPayload): Promise<AuthTokens> {
+  const { data } = await apiClient.post<AuthTokens>('/api/auth/accept-invitation', payload)
+  return data
+}

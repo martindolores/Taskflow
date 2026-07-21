@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as authApi from '@/api/authApi'
-import type { CurrentUser, LoginPayload, RegisterPayload } from '@/api/authApi'
+import type {
+  AcceptInvitationPayload,
+  CurrentUser,
+  LoginPayload,
+  RegisterPayload,
+} from '@/api/authApi'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/api/tokenStorage'
 import { AuthContext } from './context'
 
@@ -37,6 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await authApi.getCurrentUser())
   }, [])
 
+  const acceptInvitation = useCallback(async (payload: AcceptInvitationPayload) => {
+    const tokens = await authApi.acceptInvitation(payload)
+    setTokens(tokens.accessToken, tokens.refreshToken)
+    setUser(await authApi.getCurrentUser())
+  }, [])
+
   const logout = useCallback(async () => {
     const refreshToken = getRefreshToken()
     clearTokens()
@@ -51,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, isLoading, login, register, logout }),
-    [user, isLoading, login, register, logout],
+    () => ({ user, isLoading, login, register, acceptInvitation, logout }),
+    [user, isLoading, login, register, acceptInvitation, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
