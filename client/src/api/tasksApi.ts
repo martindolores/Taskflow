@@ -37,6 +37,7 @@ export interface TaskDetail {
 export interface TaskListParams {
   page: number
   pageSize: number
+  status?: TaskStatus
 }
 
 export interface TaskFormPayload {

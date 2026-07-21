@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -27,6 +27,13 @@ const filters: { label: string; value: 'all' | TaskStatus }[] = [
 
 const gridColumns = '1fr 148px 118px 90px 100px'
 
+const statusValues: TaskStatus[] = ['ToDo', 'InProgress', 'Done']
+
+function initialStatusFilter(searchParams: URLSearchParams): 'all' | TaskStatus {
+  const raw = searchParams.get('status')
+  return raw && statusValues.includes(raw as TaskStatus) ? (raw as TaskStatus) : 'all'
+}
+
 function formatDueDate(dueDate: string | null): string {
   if (!dueDate) {
     return '—'
@@ -37,8 +44,11 @@ function formatDueDate(dueDate: string | null): string {
 export function TaskListScreen() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [page, setPage] = useState(1)
-  const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>(() =>
+    initialStatusFilter(searchParams),
+  )
   const [search, setSearch] = useState('')
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
