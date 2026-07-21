@@ -25,10 +25,13 @@ test('a task created in one org is invisible to another org', async ({ page, api
   await signInAs(pageB, orgB)
 
   await pageB.goto('/tasks')
+  await expect(pageB.getByRole('heading', { name: 'Tasks' })).toBeVisible()
   await expect(pageB.getByText(title)).not.toBeVisible()
 
   await pageB.goto(`/tasks/${orgATask.id}`)
-  await expect(pageB.getByText('Task not found.')).toBeVisible()
+  // The tenant-scoped 404 goes through TanStack Query's default retry (3x, exponential backoff)
+  // before the query settles into an error and the "not found" copy renders — give it room.
+  await expect(pageB.getByText('Task not found.')).toBeVisible({ timeout: 15_000 })
 
   await contextB.close()
 })

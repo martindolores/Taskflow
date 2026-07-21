@@ -1,6 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 4173
+// Must match `Cors:AllowedOrigins` in server/src/TaskFlow.Api/appsettings.Development.json —
+// the backend only allows http://localhost:5173, so the browser-served app has to run there too.
+const PORT = 5173
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`
 
 export default defineConfig({
