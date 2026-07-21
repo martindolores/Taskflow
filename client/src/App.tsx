@@ -6,6 +6,7 @@ import { theme } from '@/theme'
 import { queryClient } from '@/api/queryClient'
 import { AuthProvider } from '@/features/auth/AuthContext'
 import { AuthScreen } from '@/features/auth/AuthScreen'
+import { OrganizationSettingsScreen } from '@/features/organization/OrganizationSettingsScreen'
 import { AppShell } from '@/routes/AppShell'
 import { PlaceholderPage } from '@/routes/PlaceholderPage'
 import { ProtectedRoute } from '@/routes/ProtectedRoute'
@@ -27,7 +28,7 @@ function App() {
                 <Route element={<AppShell />}>
                   <Route path="/dashboard" element={<PlaceholderPage title="Dashboard" />} />
                   <Route path="/tasks" element={<PlaceholderPage title="Tasks" />} />
-                  <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+                  <Route path="/settings" element={<OrganizationSettingsScreen />} />
                 </Route>
               </Route>
               <Route path="*" element={<Navigate to="/tasks" replace />} />

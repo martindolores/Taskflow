@@ -1,15 +1,15 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { isAxiosError } from 'axios'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Link from '@mui/material/Link'
 import Paper from '@mui/material/Paper'
-import TextField, { type TextFieldProps } from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import { extractErrorMessage } from '@/api/errors'
+import { LabeledField } from '@/components/LabeledField'
 import { useAuth } from './useAuth'
 import {
   loginSchema,
@@ -19,37 +19,6 @@ import {
 } from './authSchemas'
 
 type Mode = 'signin' | 'register'
-
-function extractErrorMessage(error: unknown, fallback: string): string {
-  if (isAxiosError<{ title?: string }>(error) && typeof error.response?.data?.title === 'string') {
-    return error.response.data.title
-  }
-  return fallback
-}
-
-interface LabeledFieldProps extends Omit<TextFieldProps, 'label'> {
-  label: string
-  labelExtra?: ReactNode
-}
-
-function LabeledField({ label, labelExtra, id, ...textFieldProps }: LabeledFieldProps) {
-  const generatedId = useId()
-  const inputId = id ?? generatedId
-
-  return (
-    <Box>
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.75 }}
-      >
-        <Typography component="label" htmlFor={inputId} variant="caption" sx={{ fontWeight: 500 }}>
-          {label}
-        </Typography>
-        {labelExtra}
-      </Box>
-      <TextField id={inputId} fullWidth {...textFieldProps} />
-    </Box>
-  )
-}
 
 export function AuthScreen() {
   const [mode, setMode] = useState<Mode>('signin')
