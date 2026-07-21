@@ -6,6 +6,7 @@ on:
       - "client/**"
   push:
     branches: [main]
+    tags: ["v*"]
     paths:
       - "client/**"
 
@@ -125,7 +126,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref_type == 'tag'
     needs: [build-and-test, gitleaks]
     runs-on: ubuntu-latest
     defaults:

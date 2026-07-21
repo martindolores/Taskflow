@@ -88,9 +88,16 @@ Backend and frontend each need the other's URL, so this is necessarily a two-pas
 
 ## 7. Ongoing deploys
 
-Both sides are now CI-gated the same way — neither platform's native GitHub integration is allowed to deploy `main` to production on its own:
+Commits still go straight to `main` (per `CLAUDE.md` — no PR/branch workflow), and every push to `main` still runs `build-and-test` + `gitleaks` for fast feedback. But `main` no longer drives production deploys by itself — deploys are cut deliberately by pushing a `v*` tag:
 
-- **Backend:** `render.yaml` has `autoDeploy: false`. `backend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only on push to `main`, and only after both jobs pass — it then POSTs `RENDER_DEPLOY_HOOK_URL` and polls `RENDER_HEALTH_URL/health` until the new deploy is live.
-- **Frontend:** `client/vercel.json` has `git.deploymentEnabled.main: false`. `frontend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only on push to `main`, and only after both jobs pass — it then runs `vercel build --prod` + `vercel deploy --prebuilt --prod` using `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID`.
+```
+git tag v1.2.0
+git push origin v1.2.0
+```
 
-In both cases a failing test, lint, type-check, or secret scan blocks the production deploy outright. PR branches still get Vercel preview deployments as before — only `main` → Production is gated.
+- **Backend:** `render.yaml` has `autoDeploy: false`. `backend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only when the push is a tag (`github.ref_type == 'tag'`), and only after both jobs pass — it then POSTs `RENDER_DEPLOY_HOOK_URL` and polls `RENDER_HEALTH_URL/health` until the new deploy is live.
+- **Frontend:** `client/vercel.json` has `git.deploymentEnabled.main: false`. `frontend-ci.yml`'s `deploy` job (`needs: [build-and-test, gitleaks]`) runs only when the push is a tag, and only after both jobs pass — it then runs `vercel build --prod` + `vercel deploy --prebuilt --prod` using `VERCEL_TOKEN`/`VERCEL_ORG_ID`/`VERCEL_PROJECT_ID`.
+
+Both workflows trigger on any `v*` tag regardless of which paths changed — GitHub can't diff a brand-new ref against a prior commit, so the `paths` filter is bypassed for tag pushes. That means one tag deploys both sides together, which is the point: a tag marks a full-stack release, not a single-service update.
+
+In both cases a failing test, lint, type-check, or secret scan blocks the production deploy outright. PR branches still get Vercel preview deployments as before — only tagged releases reach Production.
