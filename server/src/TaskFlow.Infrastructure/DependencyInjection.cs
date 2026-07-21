@@ -4,11 +4,13 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Common;
 using TaskFlow.Application.Organizations;
+using TaskFlow.Application.TaskComments;
 using TaskFlow.Application.Tasks;
 using TaskFlow.Application.Users;
 using TaskFlow.Infrastructure.Auth;
 using TaskFlow.Infrastructure.Organizations;
 using TaskFlow.Infrastructure.Persistence;
+using TaskFlow.Infrastructure.TaskComments;
 using TaskFlow.Infrastructure.Tasks;
 using TaskFlow.Infrastructure.Users;
 
@@ -32,6 +34,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IOrganizationService, OrganizationService>();
         services.AddScoped<ITaskService, TaskService>();
+        services.AddScoped<ITaskCommentService, TaskCommentService>();
 
         return services;
     }

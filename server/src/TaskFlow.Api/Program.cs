@@ -100,6 +100,7 @@ app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapOrganizationEndpoints();
 app.MapTaskEndpoints();
+app.MapTaskCommentEndpoints();
 
 app.Run();
 

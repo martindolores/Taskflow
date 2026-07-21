@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.Auth.Exceptions;
 using TaskFlow.Application.Organizations.Exceptions;
+using TaskFlow.Application.TaskComments.Exceptions;
 using TaskFlow.Application.Tasks.Exceptions;
 
 namespace TaskFlow.Api.Middleware;
@@ -59,6 +60,8 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         TaskNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
         InvalidAssigneeException => (StatusCodes.Status400BadRequest, exception.Message),
         TaskAccessForbiddenException => (StatusCodes.Status403Forbidden, exception.Message),
+        CommentNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+        CommentAccessForbiddenException => (StatusCodes.Status403Forbidden, exception.Message),
         _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred."),
     };
 }
