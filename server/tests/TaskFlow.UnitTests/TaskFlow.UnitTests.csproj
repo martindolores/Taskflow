@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\TaskFlow.Application\TaskFlow.Application.csproj" />
     <ProjectReference Include="..\..\src\TaskFlow.Domain\TaskFlow.Domain.csproj" />
+    <ProjectReference Include="..\..\src\TaskFlow.Infrastructure\TaskFlow.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

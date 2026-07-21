@@ -1,6 +1,16 @@
+using System.Text;
+using System.Text.Json.Serialization;
+using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using TaskFlow.Api.Endpoints;
 using TaskFlow.Api.Middleware;
+using TaskFlow.Api.Services;
+using TaskFlow.Application.Auth.Validators;
+using TaskFlow.Application.Common;
 using TaskFlow.Infrastructure;
+using TaskFlow.Infrastructure.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +23,38 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+
+var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()
+    ?? throw new InvalidOperationException("Jwt configuration section is not configured.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidateAudience = true,
+            ValidAudience = jwtOptions.Audience,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+            RoleClaimType = "role",
+            NameClaimType = "sub",
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -45,8 +87,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(CorsPolicyName);
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapGet("/", () => Results.Ok());
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+
+app.MapAuthEndpoints();
 
 app.Run();
 

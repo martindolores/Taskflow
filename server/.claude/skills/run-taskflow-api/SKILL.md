@@ -66,7 +66,7 @@ Swagger UI at `http://localhost:5151/swagger/index.html` (Development only).
 dotnet test
 ```
 
-`TaskFlow.IntegrationTests` uses `WebApplicationFactory` + Testcontainers, spinning up its own ephemeral Postgres via Docker (separate from the `docker-compose.yml` instance) — Docker must be running. Expect 32 passing tests. `TaskFlow.UnitTests` currently has no test files, so `dotnet test` reports "No test is available" for that project — this is expected at this stage of the build, not a failure.
+`TaskFlow.IntegrationTests` runs via `WebApplicationFactory` against the `docker-compose.yml` Postgres instance (not an isolated Testcontainers instance) — Docker must be running and the DB reachable. Expect 43 passing integration tests and 22 passing unit tests.
 
 ---
 
