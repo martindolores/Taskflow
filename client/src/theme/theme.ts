@@ -137,10 +137,16 @@ export const theme = createTheme({
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        root: {
-          backgroundColor: '#18181f',
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.surface.input,
           borderRadius: 7,
-        },
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.border.default,
+          },
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.border.hover,
+          },
+        }),
       },
     },
   },

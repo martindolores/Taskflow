@@ -46,11 +46,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined
+    const isAuthRequest = originalRequest?.url?.startsWith('/api/auth/')
 
-    if (error.response?.status !== 401 || !originalRequest || originalRequest._retry) {
-      if (error.response?.status === 401) {
-        redirectToLogin()
-      }
+    if (error.response?.status !== 401 || !originalRequest || isAuthRequest) {
+      return Promise.reject(error)
+    }
+
+    if (originalRequest._retry) {
+      redirectToLogin()
       return Promise.reject(error)
     }
 
