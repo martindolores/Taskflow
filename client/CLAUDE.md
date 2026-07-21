@@ -53,27 +53,27 @@ e2e/              # Playwright specs — real backend, no mocking (added PR-F11)
 
 ## Key files
 
-| What | Path |
-|---|---|
-| Axios instance + interceptors | `src/api/client.ts` |
-| Token storage | `src/api/tokenStorage.ts` |
-| Query client | `src/api/queryClient.ts` |
-| Per-resource API modules | `src/api/{authApi,tasksApi,commentsApi,organizationApi}.ts` |
-| Shared API error handling (`extractErrorMessage`, `applyFieldErrors`) | `src/api/errors.ts` |
-| Toast bus + host (`showToast`, mounted once in `App.tsx`) | `src/components/{toast,ToastHost}.ts(x)` |
-| MUI theme + palette augmentation | `src/theme/theme.ts` |
-| Auth state | `src/features/auth/AuthContext.tsx`, `context.ts`, `useAuth.ts` |
-| Auth screens | `src/features/auth/{AuthScreen,AcceptInvitationScreen}.tsx` |
-| Task screens | `src/features/tasks/{TaskListScreen,TaskDetailScreen,TaskFormModal}.tsx` |
-| Task queries/schemas | `src/features/tasks/{tasksQueries,commentsQueries,taskSchemas}.ts` |
-| Organization settings | `src/features/organization/OrganizationSettingsScreen.tsx` |
-| Shared dumb components | `src/components/{LabeledField,PriorityLabel,RoleBadge,StatusChip,UserAvatar}.tsx` |
-| Routing/guards | `src/routes/{AppShell,ProtectedRoute,PublicRoute,ErrorBoundary,NotFoundScreen}.tsx` |
-| App entry | `src/App.tsx` |
-| Env typing | `src/vite-env.d.ts` |
-| Playwright config | `playwright.config.ts` |
-| e2e specs | `e2e/{auth,invitation,tasks,tenant-isolation}.spec.ts` |
-| e2e fixtures + API seeding helpers | `e2e/fixtures.ts`, `e2e/helpers/api.ts` |
+| What                                                                  | Path                                                                                |
+| --------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Axios instance + interceptors                                         | `src/api/client.ts`                                                                 |
+| Token storage                                                         | `src/api/tokenStorage.ts`                                                           |
+| Query client                                                          | `src/api/queryClient.ts`                                                            |
+| Per-resource API modules                                              | `src/api/{authApi,tasksApi,commentsApi,organizationApi}.ts`                         |
+| Shared API error handling (`extractErrorMessage`, `applyFieldErrors`) | `src/api/errors.ts`                                                                 |
+| Toast bus + host (`showToast`, mounted once in `App.tsx`)             | `src/components/{toast,ToastHost}.ts(x)`                                            |
+| MUI theme + palette augmentation                                      | `src/theme/theme.ts`                                                                |
+| Auth state                                                            | `src/features/auth/AuthContext.tsx`, `context.ts`, `useAuth.ts`                     |
+| Auth screens                                                          | `src/features/auth/{AuthScreen,AcceptInvitationScreen}.tsx`                         |
+| Task screens                                                          | `src/features/tasks/{TaskListScreen,TaskDetailScreen,TaskFormModal}.tsx`            |
+| Task queries/schemas                                                  | `src/features/tasks/{tasksQueries,commentsQueries,taskSchemas}.ts`                  |
+| Organization settings                                                 | `src/features/organization/OrganizationSettingsScreen.tsx`                          |
+| Shared dumb components                                                | `src/components/{LabeledField,PriorityLabel,RoleBadge,StatusChip,UserAvatar}.tsx`   |
+| Routing/guards                                                        | `src/routes/{AppShell,ProtectedRoute,PublicRoute,ErrorBoundary,NotFoundScreen}.tsx` |
+| App entry                                                             | `src/App.tsx`                                                                       |
+| Env typing                                                            | `src/vite-env.d.ts`                                                                 |
+| Playwright config                                                     | `playwright.config.ts`                                                              |
+| e2e specs                                                             | `e2e/{auth,invitation,tasks,tenant-isolation}.spec.ts`                              |
+| e2e fixtures + API seeding helpers                                    | `e2e/fixtures.ts`, `e2e/helpers/api.ts`                                             |
 
 ## Patterns to follow
 
