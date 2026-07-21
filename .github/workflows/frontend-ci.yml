@@ -1,0 +1,121 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    paths:
+      - "client/**"
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: taskflow
+          POSTGRES_DB: taskflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: client/.nvmrc
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Lint
+        working-directory: client
+        run: npm run lint
+
+      - name: Format check
+        working-directory: client
+        run: npm run format:check
+
+      - name: Type check
+        working-directory: client
+        run: npx tsc -b --noEmit
+
+      - name: Build
+        working-directory: client
+        run: npm run build
+        env:
+          VITE_API_URL: http://localhost:5151
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore backend
+        working-directory: server
+        run: dotnet restore
+
+      - name: Build backend
+        working-directory: server
+        run: dotnet build --no-restore
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Apply migrations
+        working-directory: server
+        run: dotnet ef database update --project src/TaskFlow.Infrastructure --startup-project src/TaskFlow.Api
+        env:
+          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
+
+      - name: Start backend
+        working-directory: server
+        run: |
+          dotnet run --no-build --project src/TaskFlow.Api &
+          for i in $(seq 1 20); do
+            if curl -fsS http://localhost:5151/health; then
+              echo "Backend is healthy"
+              exit 0
+            fi
+            echo "Waiting for backend to become healthy... ($i/20)"
+            sleep 3
+          done
+          echo "Backend did not become healthy in time" >&2
+          exit 1
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
+
+      - name: Install Playwright browsers
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      - name: Run e2e tests
+        working-directory: client
+        run: npm run test:e2e
+        env:
+          E2E_API_URL: http://localhost:5151
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: client/playwright-report/
+          retention-days: 7
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
