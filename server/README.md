@@ -7,12 +7,12 @@ ASP.NET Core Web API for TaskFlow. See [`../docs/backend-plan.md`](../docs/backe
 ```
 src/
   TaskFlow.Domain          # Entities, enums, no dependencies
-  TaskFlow.Application      # Services, validators, interfaces
-  TaskFlow.Infrastructure    # EF Core DbContext, repositories, JWT implementation
-  TaskFlow.Api                # Controllers, middleware, DI composition root
+  TaskFlow.Application      # DTOs, validators, service interfaces
+  TaskFlow.Infrastructure    # EF Core DbContext, service implementations (auth, JWT, password hashing)
+  TaskFlow.Api                # Minimal-API endpoint groups, middleware, DI composition root
 tests/
   TaskFlow.UnitTests
-  TaskFlow.IntegrationTests   # WebApplicationFactory + Testcontainers Postgres
+  TaskFlow.IntegrationTests   # WebApplicationFactory against the docker-compose Postgres
 ```
 
 ## Prerequisites
@@ -57,8 +57,12 @@ dotnet build
 dotnet run --project src/TaskFlow.Api
 ```
 
+Serves the API at `http://localhost:5151`; Swagger UI is at `http://localhost:5151/swagger/index.html` in Development.
+
 ## Running tests
 
 ```bash
 dotnet test
 ```
+
+`TaskFlow.IntegrationTests` runs against the **same `docker-compose.yml` Postgres** used for local dev (not an isolated instance) — make sure `docker compose up -d` has been run first. Data persists across test runs, so tests that insert rows use unique values to avoid unique-constraint collisions.

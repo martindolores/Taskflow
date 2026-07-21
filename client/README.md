@@ -1,32 +1,55 @@
-# React + TypeScript + Vite
+# Taskflow — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+React + TypeScript frontend for Taskflow, built with Vite and MUI. See [`../docs/frontend-plan.md`](../docs/frontend-plan.md) for the full technical spec and build plan.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Vite, React 19, TypeScript, MUI v9 (Emotion), React Router, TanStack Query, React Hook Form + Zod, Axios.
 
-## React Compiler
+## Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```
+src/
+  api/            # axios instance, tokenStorage, per-resource API modules, query client
+  components/     # shared/dumb components
+  features/
+    auth/
+    organization/
+    tasks/
+  routes/         # route components, ProtectedRoute / PublicRoute
+  theme/          # MUI theme (palette/typography/shape tokens)
+  App.tsx
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Prerequisites
+
+- Node.js `^20.19.0 || >=22.12.0` — use [nvm](https://github.com/nvm-sh/nvm) with the repo's `.nvmrc`:
+  ```bash
+  nvm use
+  ```
+- The Taskflow backend running locally (see [`../server/README.md`](../server/README.md)) — the app expects it at the URL configured below.
+
+## Setup
+
+```bash
+npm install
+cp .env.example .env   # VITE_API_URL=http://localhost:5151, correct as-is for local dev
+```
+
+## Running locally
+
+```bash
+npm run dev       # http://localhost:5173
+```
+
+## Other commands
+
+```bash
+npm run build          # tsc -b && vite build
+npm run lint            # oxlint
+npm run format           # prettier --write .
+npm run format:check      # prettier --check . (CI gate)
+npm run preview           # serve the production build locally
+```
+
+No test runner is wired up yet — Playwright e2e is planned for a later chunk (`PR-F11` in `../docs/frontend-plan.md`).
