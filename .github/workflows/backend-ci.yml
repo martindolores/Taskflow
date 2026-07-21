@@ -1,0 +1,93 @@
+name: Backend CI
+
+on:
+  pull_request:
+    paths:
+      - "server/**"
+  push:
+    branches: [main]
+    paths:
+      - "server/**"
+
+defaults:
+  run:
+    working-directory: server
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: taskflow
+          POSTGRES_PASSWORD: taskflow
+          POSTGRES_DB: taskflow
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Format check
+        run: dotnet format --verify-no-changes
+
+      - name: Build
+        run: dotnet build --no-restore --warnaserror
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Apply migrations
+        run: dotnet ef database update --project src/TaskFlow.Infrastructure --startup-project src/TaskFlow.Api
+        env:
+          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
+
+      - name: Test
+        run: dotnet test --no-build
+        env:
+          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-and-test, gitleaks]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Verify deploy health
+        run: |
+          for i in $(seq 1 20); do
+            if curl -fsS "${{ secrets.RENDER_HEALTH_URL }}/health"; then
+              echo "Health check passed"
+              exit 0
+            fi
+            echo "Waiting for deploy to become healthy... ($i/20)"
+            sleep 15
+          done
+          echo "Deploy did not become healthy in time" >&2
+          exit 1
