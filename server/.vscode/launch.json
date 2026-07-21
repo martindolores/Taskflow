@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TaskFlow.Api",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/TaskFlow.Api/bin/Debug/net8.0/TaskFlow.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/TaskFlow.Api",
+      "stopAtEntry": false,
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5151"
+      },
+      "console": "internalConsole"
+    }
+  ]
+}
