@@ -26,6 +26,25 @@ Agent-path shortcuts (see `.claude/skills/`): `run-taskflow-api/smoke.sh` does b
 
 **Stopping a background `dotnet run`**: it forks a child process, so the shell's `$!` won't stop it reliably — kill by port instead: `lsof -ti:5151 -sTCP:LISTEN | xargs -r kill`.
 
+## Key files
+
+| What | Path |
+|---|---|
+| DI composition root (Infrastructure) | `src/TaskFlow.Infrastructure/DependencyInjection.cs` |
+| DI/middleware composition root (Api) | `src/TaskFlow.Api/Program.cs` |
+| EF Core `DbContext` | `src/TaskFlow.Infrastructure/Persistence/AppDbContext.cs` |
+| Entity configurations | `src/TaskFlow.Infrastructure/Persistence/Configurations/*Configuration.cs` |
+| Migrations | `src/TaskFlow.Infrastructure/Migrations/` |
+| Domain entities | `src/TaskFlow.Domain/Entities/{User,Organization,TaskItem,TaskComment,Invitation,RefreshToken}.cs` |
+| Endpoint groups | `src/TaskFlow.Api/Endpoints/{Auth,User,Organization,Task,TaskComment}Endpoints.cs` |
+| Global exception → `ProblemDetails` mapping | `src/TaskFlow.Api/Middleware/GlobalExceptionHandler.cs` |
+| Validation endpoint filter | `src/TaskFlow.Api/Filters/ValidationFilter.cs` |
+| Per-feature DTOs/exceptions/validators | `src/TaskFlow.Application/<Feature>/{Dtos,Exceptions,Validators}/` |
+| Config defaults | `src/TaskFlow.Api/appsettings.json`, `appsettings.Development.json` |
+| Unit tests | `tests/TaskFlow.UnitTests/<Feature>/` |
+| Integration tests | `tests/TaskFlow.IntegrationTests/` |
+| Local Postgres | `docker-compose.yml` |
+
 ## Architecture
 
 Four projects, strict dependency direction (`Api → Infrastructure → Application → Domain`):

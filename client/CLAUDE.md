@@ -44,6 +44,26 @@ src/
 - **`src/api/tokenStorage.ts`** — thin `localStorage` wrapper (`taskflow.accessToken` / `taskflow.refreshToken`). `AuthContext` (PR-F2) will build on top of this rather than reading `localStorage` directly elsewhere.
 - **`src/api/queryClient.ts`** — the single `QueryClient` instance, provided at the root in `App.tsx`.
 
+## Key files
+
+| What | Path |
+|---|---|
+| Axios instance + interceptors | `src/api/client.ts` |
+| Token storage | `src/api/tokenStorage.ts` |
+| Query client | `src/api/queryClient.ts` |
+| Per-resource API modules | `src/api/{authApi,tasksApi,commentsApi,organizationApi}.ts` |
+| Shared API error handling | `src/api/errors.ts` |
+| MUI theme + palette augmentation | `src/theme/theme.ts` |
+| Auth state | `src/features/auth/AuthContext.tsx`, `context.ts`, `useAuth.ts` |
+| Auth screens | `src/features/auth/{AuthScreen,AcceptInvitationScreen}.tsx` |
+| Task screens | `src/features/tasks/{TaskListScreen,TaskDetailScreen,TaskFormModal}.tsx` |
+| Task queries/schemas | `src/features/tasks/{tasksQueries,commentsQueries,taskSchemas}.ts` |
+| Organization settings | `src/features/organization/OrganizationSettingsScreen.tsx` |
+| Shared dumb components | `src/components/{LabeledField,PriorityLabel,RoleBadge,StatusChip,UserAvatar}.tsx` |
+| Routing/guards | `src/routes/{AppShell,ProtectedRoute,PublicRoute,PlaceholderPage}.tsx` |
+| App entry | `src/App.tsx` |
+| Env typing | `src/vite-env.d.ts` |
+
 ## Patterns to follow
 
 - **Absolute imports**: `@/*` maps to `src/*` (`tsconfig.app.json` `paths`, picked up automatically by `vite-tsconfig-paths` in `vite.config.ts`). Prefer `@/theme`, `@/api/client`, etc. over relative `../../` chains.

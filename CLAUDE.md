@@ -14,6 +14,18 @@ Taskflow is a multi-tenant task/project management app: an ASP.NET Core Web API 
 - `docs/frontend-plan.md` — the authoritative frontend spec: architecture, design tokens, and the ordered PR-F0…PR-F13 build plan (companion doc to `backend-plan.md`; endpoints are ordered so the frontend never waits on a backend PR it needs). Check it before adding or changing a screen.
 - `designs/` — a Claude Design handoff bundle (HTML/CSS/JS prototypes), not production code. Read `designs/README.md` first — it explains how to read `designs/project/Taskflow.dc.html` before implementing any frontend work from it.
 
+## Key files
+
+| What | Path |
+|---|---|
+| Backend spec (data model, endpoints, PR-B0…PR-B12 plan) | `docs/backend-plan.md` |
+| Frontend spec (architecture, design tokens, PR-F0…PR-F13 plan) | `docs/frontend-plan.md` |
+| Design handoff bundle (read `designs/README.md` first) | `designs/project/Taskflow.dc.html` |
+| Backend build/test/migration commands & architecture | `server/CLAUDE.md` (§ Key files has the file map) |
+| Frontend build/lint/format commands & conventions | `client/CLAUDE.md` (§ Key files has the file map) |
+| Local Postgres for backend dev/tests | `server/docker-compose.yml` |
+| Agent-path shortcuts (build/run/query DB) | `server/.claude/skills/{run-taskflow-api,query-taskflow-db}/` |
+
 ## Working conventions
 
 - Backend work ships as the ordered `PR-B<N>` chunks defined in `docs/backend-plan.md` §3, one PR per chunk, later chunks depending on earlier ones. Commit messages reference the chunk, e.g. `Add auth: registration, login, JWT issuance (PR-B4)`. Check `git log` and `docs/backend-plan.md` to see which chunk is next before starting new backend work.
