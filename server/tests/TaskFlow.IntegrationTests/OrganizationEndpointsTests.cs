@@ -223,6 +223,18 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
     }
 
     [Fact]
+    public async Task RevokeInvitation_FromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var invitation = await InviteAsync(admin.Client, UniqueEmail());
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await otherAdmin.Client.DeleteAsync($"/api/organization/invitations/{invitation.Id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateMemberRole_AsAdmin_ChangesRole()
     {
         var admin = await RegisterAdminAsync();
@@ -260,6 +272,17 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
         var admin = await RegisterAdminAsync();
 
         var response = await admin.Client.PatchAsJsonAsync($"/api/organization/members/{Guid.NewGuid()}/role", new UpdateMemberRoleRequest(UserRole.Admin));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateMemberRole_MemberFromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await admin.Client.PatchAsJsonAsync($"/api/organization/members/{otherAdmin.Registered.UserId}/role", new UpdateMemberRoleRequest(UserRole.Admin));
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
@@ -306,6 +329,17 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
         var admin = await RegisterAdminAsync();
 
         var response = await admin.Client.DeleteAsync($"/api/organization/members/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeactivateMember_MemberFromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await admin.Client.DeleteAsync($"/api/organization/members/{otherAdmin.Registered.UserId}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }

@@ -11,7 +11,7 @@ namespace TaskFlow.Infrastructure.Tasks;
 
 public sealed class TaskService(AppDbContext db, ICurrentUserService currentUserService) : ITaskService
 {
-    public async Task<TaskListResponse> GetTasksAsync(TaskListQuery query, CancellationToken cancellationToken)
+    public async Task<PagedResult<TaskListItemResponse>> GetTasksAsync(TaskListQuery query, CancellationToken cancellationToken)
     {
         var page = Math.Max(query.Page, 1);
         var pageSize = Math.Clamp(query.PageSize, 1, 100);
@@ -50,7 +50,7 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
                 t.CreatedAt))
             .ToListAsync(cancellationToken);
 
-        return new TaskListResponse(items, total, page, pageSize);
+        return new PagedResult<TaskListItemResponse>(items, total, page, pageSize);
     }
 
     public async Task<TaskResponse> GetTaskAsync(Guid taskId, CancellationToken cancellationToken)

@@ -212,4 +212,18 @@ public class TaskCommentEndpointsTests(WebApplicationFactory<Program> factory) :
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
+
+    [Fact]
+    public async Task DeleteComment_FromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var taskId = await CreateTaskAsync(admin.Client);
+        var createResponse = await admin.Client.PostAsJsonAsync($"/api/tasks/{taskId}/comments", new CreateCommentRequest("Sensitive."));
+        var comment = (await createResponse.Content.ReadFromJsonAsync<CommentResponse>(JsonOptions))!;
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await otherAdmin.Client.DeleteAsync($"/api/tasks/{taskId}/comments/{comment.Id}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
 }

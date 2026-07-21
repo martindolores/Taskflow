@@ -1,10 +1,11 @@
+using TaskFlow.Application.Common;
 using TaskFlow.Application.Tasks.Dtos;
 
 namespace TaskFlow.Application.Tasks;
 
 public interface ITaskService
 {
-    Task<TaskListResponse> GetTasksAsync(TaskListQuery query, CancellationToken cancellationToken);
+    Task<PagedResult<TaskListItemResponse>> GetTasksAsync(TaskListQuery query, CancellationToken cancellationToken);
 
     Task<TaskResponse> GetTaskAsync(Guid taskId, CancellationToken cancellationToken);
 

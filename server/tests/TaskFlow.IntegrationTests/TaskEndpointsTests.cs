@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth.Dtos;
+using TaskFlow.Application.Common;
 using TaskFlow.Application.Organizations.Dtos;
 using TaskFlow.Application.Tasks.Dtos;
 using TaskFlow.Domain.Enums;
@@ -159,7 +160,7 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         var response = await admin.Client.GetAsync("/api/tasks");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var body = await response.Content.ReadFromJsonAsync<TaskListResponse>(JsonOptions);
+        var body = await response.Content.ReadFromJsonAsync<PagedResult<TaskListItemResponse>>(JsonOptions);
         Assert.NotNull(body);
         Assert.Single(body!.Items);
         Assert.Equal("Task A", body.Items[0].Title);
@@ -176,7 +177,7 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
 
         var response = await admin.Client.GetAsync("/api/tasks?priority=Low&status=Done");
 
-        var body = await response.Content.ReadFromJsonAsync<TaskListResponse>(JsonOptions);
+        var body = await response.Content.ReadFromJsonAsync<PagedResult<TaskListItemResponse>>(JsonOptions);
         Assert.NotNull(body);
         Assert.Single(body!.Items);
         Assert.Equal(lowPriority.Id, body.Items[0].Id);
@@ -193,7 +194,7 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
 
         var response = await admin.Client.GetAsync("/api/tasks?page=1&pageSize=2");
 
-        var body = await response.Content.ReadFromJsonAsync<TaskListResponse>(JsonOptions);
+        var body = await response.Content.ReadFromJsonAsync<PagedResult<TaskListItemResponse>>(JsonOptions);
         Assert.NotNull(body);
         Assert.Equal(2, body!.Items.Count);
         Assert.Equal(3, body.Total);
@@ -230,6 +231,19 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     }
 
     [Fact]
+    public async Task UpdateTask_FromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var created = await CreateTaskAsync(admin.Client);
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await otherAdmin.Client.PutAsJsonAsync($"/api/tasks/{created.Id}", new UpdateTaskRequest(
+            "Updated title", "Updated body", TaskItemStatus.InProgress, TaskPriority.Low, null, null));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdateTaskStatus_WithValidRequest_UpdatesStatus()
     {
         var admin = await RegisterAdminAsync();
@@ -241,6 +255,18 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         var body = await response.Content.ReadFromJsonAsync<TaskStatusResponse>(JsonOptions);
         Assert.NotNull(body);
         Assert.Equal(TaskItemStatus.Done, body!.Status);
+    }
+
+    [Fact]
+    public async Task UpdateTaskStatus_FromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var created = await CreateTaskAsync(admin.Client);
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await otherAdmin.Client.PatchAsJsonAsync($"/api/tasks/{created.Id}/status", new UpdateTaskStatusRequest(TaskItemStatus.Done));
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 
     [Fact]
@@ -286,6 +312,18 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         var admin = await RegisterAdminAsync();
 
         var response = await admin.Client.DeleteAsync($"/api/tasks/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task DeleteTask_FromAnotherOrg_ReturnsNotFound()
+    {
+        var admin = await RegisterAdminAsync();
+        var created = await CreateTaskAsync(admin.Client);
+        var otherAdmin = await RegisterAdminAsync();
+
+        var response = await otherAdmin.Client.DeleteAsync($"/api/tasks/{created.Id}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
