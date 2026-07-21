@@ -12,6 +12,7 @@ Taskflow is a multi-tenant task/project management app: an ASP.NET Core Web API 
 - `client/` — the React frontend. **Read `client/CLAUDE.md` before working here** — it has the build/lint/format commands, folder structure, and API-client conventions. Nothing frontend-specific is repeated in this file.
 - `docs/backend-plan.md` — the authoritative backend spec: full data model, endpoint contracts, and the ordered PR-B0…PR-B12 build plan. Check it before adding or changing an endpoint.
 - `docs/frontend-plan.md` — the authoritative frontend spec: architecture, design tokens, and the ordered PR-F0…PR-F13 build plan (companion doc to `backend-plan.md`; endpoints are ordered so the frontend never waits on a backend PR it needs). Check it before adding or changing a screen.
+- `docs/deployment-plan.md` — step-by-step runbook for deploying the free-tier stack (Render backend, Vercel frontend, Neon Postgres), building on the config `backend-plan.md` §4 and `frontend-plan.md` §4 already describe.
 - `designs/` — a Claude Design handoff bundle (HTML/CSS/JS prototypes), not production code. Read `designs/README.md` first — it explains how to read `designs/project/Taskflow.dc.html` before implementing any frontend work from it.
 
 ## Key files
@@ -20,6 +21,7 @@ Taskflow is a multi-tenant task/project management app: an ASP.NET Core Web API 
 |---|---|
 | Backend spec (data model, endpoints, PR-B0…PR-B12 plan) | `docs/backend-plan.md` |
 | Frontend spec (architecture, design tokens, PR-F0…PR-F13 plan) | `docs/frontend-plan.md` |
+| Deployment runbook (Render + Vercel + Neon, free tier) | `docs/deployment-plan.md` |
 | Design handoff bundle (read `designs/README.md` first) | `designs/project/Taskflow.dc.html` |
 | Backend build/test/migration commands & architecture | `server/CLAUDE.md` (§ Key files has the file map) |
 | Frontend build/lint/format commands & conventions | `client/CLAUDE.md` (§ Key files has the file map) |
