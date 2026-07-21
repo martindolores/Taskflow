@@ -60,7 +60,7 @@ Four projects, strict dependency direction (`Api → Infrastructure → Applicat
 - **New domain exception**: put it in `TaskFlow.Application/<Feature>/Exceptions/`, then add a case to `GlobalExceptionHandler.MapException` — otherwise it falls through to a generic 500.
 - **Enums**: stored as `varchar` in Postgres (`HasConversion<string>()` in the entity configuration) and serialized as strings over the wire (`JsonStringEnumConverter` registered globally in `Program.cs`) — update both when adding a new enum.
 - **JWT claims** are the short names `sub` / `org` / `role`, not the long `ClaimTypes.*` URIs — `MapInboundClaims = false` in `Program.cs` is what keeps them that way. Read the current user via `ICurrentUserService`, not `HttpContext.User` directly.
-- **Multi-tenancy**: every tenant-scoped table has `organization_id`, but the global EF Core query filter that enforces it per-request isn't wired up yet (planned for PR-B5) — don't assume tenant isolation is already enforced when writing new queries.
+- **Multi-tenancy**: every tenant-scoped table has `organization_id`, enforced per-request by a global EF Core query filter on `User`, `TaskItem`, `TaskComment`, and `Invitation` scoped to `ICurrentTenantService.OrganizationId` (see `AppDbContext.OnModelCreating`) — covered by `TenantIsolationTests`.
 - **Config**: nested keys use double-underscore env var overrides (`ConnectionStrings__Default`, `Jwt__Secret`, `Cors__AllowedOrigins`); `appsettings.json` dev defaults already match `docker-compose.yml` credentials, so no local `.env` setup is needed.
 
 ## Tests
