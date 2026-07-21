@@ -4,10 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Common;
 using TaskFlow.Application.Organizations;
+using TaskFlow.Application.Tasks;
 using TaskFlow.Application.Users;
 using TaskFlow.Infrastructure.Auth;
 using TaskFlow.Infrastructure.Organizations;
 using TaskFlow.Infrastructure.Persistence;
+using TaskFlow.Infrastructure.Tasks;
 using TaskFlow.Infrastructure.Users;
 
 namespace TaskFlow.Infrastructure;
@@ -29,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IOrganizationService, OrganizationService>();
+        services.AddScoped<ITaskService, TaskService>();
 
         return services;
     }

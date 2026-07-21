@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Application.Auth.Exceptions;
 using TaskFlow.Application.Organizations.Exceptions;
+using TaskFlow.Application.Tasks.Exceptions;
 
 namespace TaskFlow.Api.Middleware;
 
@@ -55,6 +56,9 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         InvitationAlreadyPendingException => (StatusCodes.Status409Conflict, exception.Message),
         InvitationNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
         MemberNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+        TaskNotFoundException => (StatusCodes.Status404NotFound, exception.Message),
+        InvalidAssigneeException => (StatusCodes.Status400BadRequest, exception.Message),
+        TaskAccessForbiddenException => (StatusCodes.Status403Forbidden, exception.Message),
         _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred."),
     };
 }

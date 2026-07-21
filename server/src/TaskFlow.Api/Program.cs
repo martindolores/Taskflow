@@ -99,6 +99,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
 app.MapOrganizationEndpoints();
+app.MapTaskEndpoints();
 
 app.Run();
 
