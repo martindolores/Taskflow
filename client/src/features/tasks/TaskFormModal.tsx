@@ -16,6 +16,7 @@ import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import type { TaskDetail } from '@/api/tasksApi'
 import type { Member } from '@/api/organizationApi'
 import { LabeledField } from '@/components/LabeledField'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { useCreateTaskMutation, useUpdateTaskMutation } from './tasksQueries'
 import { taskFormSchema, type TaskFormValues } from './taskSchemas'
 
@@ -39,6 +40,7 @@ interface TaskFormModalProps {
 }
 
 export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormModalProps) {
+  const isMobile = useIsMobile()
   const createTask = useCreateTaskMutation()
   const updateTask = useUpdateTaskMutation()
   const mutation = mode === 'edit' ? updateTask : createTask
@@ -88,7 +90,7 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobile}>
       <DialogTitle sx={{ fontSize: 17, fontWeight: 600, letterSpacing: '-0.3px' }}>
         {mode === 'edit' ? 'Edit task' : 'New task'}
       </DialogTitle>
@@ -132,7 +134,13 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
             />
           )}
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr',
+              gap: 1.5,
+            }}
+          >
             <Controller
               control={control}
               name="assigneeId"
