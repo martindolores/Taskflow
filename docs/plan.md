@@ -183,6 +183,18 @@ Built directly against the responsive Dashboard (PR-M7) and Task Detail (PR-M3) 
 
 **Depends on:** PR-M1 through PR-M10 (needs the full responsive surface to test against)
 
+### PR-M12 — Dependabot for backend & frontend dependencies ⬜
+
+- Add `.github/dependabot.yml` with two update configs:
+  - `package-ecosystem: nuget`, `directory: /server`, weekly schedule — covers the ASP.NET Core backend's NuGet packages
+  - `package-ecosystem: npm`, `directory: /client`, weekly schedule — covers the React frontend's npm packages
+- Group minor/patch updates per ecosystem to avoid a separate PR per package; leave major version bumps ungrouped so they surface individually for review
+- Cap `open-pull-requests-limit` (e.g. 10) per ecosystem to avoid flooding
+- No code changes — config-only, runs against existing `backend-ci.yml`/`frontend-ci.yml` checks on the PRs it opens
+- Set `target-branch: main` explicitly — Dependabot only operates via PRs (no direct-commit mode), which is a deliberate exception to this repo's normal direct-to-`main` convention (see root `CLAUDE.md` § Working conventions). Each dependency-update PR needs manual review and merge; nothing lands automatically
+
+**Depends on:** nothing — independent of the responsive/Projects/Activity Log work, can land anytime
+
 ---
 
 ## 4. Deployment
