@@ -397,6 +397,13 @@ export function OrganizationSettingsScreen() {
         </Paper>
       )}
 
+      <Typography
+        variant="caption"
+        sx={{ display: 'block', color: 'text.disabled', mt: 2.25, textAlign: 'center' }}
+      >
+        Taskflow v{__APP_VERSION__}
+      </Typography>
+
       <Dialog open={!!memberToRemove} onClose={() => setMemberToRemove(null)}>
         <DialogTitle>Remove team member</DialogTitle>
         <DialogContent>

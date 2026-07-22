@@ -19,6 +19,17 @@ public class HealthEndpointTests(WebApplicationFactory<Program> factory) : IClas
     }
 
     [Fact]
+    public async Task GetHealth_ReturnsNonEmptyVersion()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/health");
+
+        var body = await response.Content.ReadFromJsonAsync<HealthResponse>();
+        Assert.False(string.IsNullOrWhiteSpace(body?.Version));
+    }
+
+    [Fact]
     public async Task GetRoot_ReturnsOk()
     {
         var client = factory.CreateClient();
@@ -28,5 +39,5 @@ public class HealthEndpointTests(WebApplicationFactory<Program> factory) : IClas
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    private sealed record HealthResponse(string Status);
+    private sealed record HealthResponse(string Status, string Version);
 }

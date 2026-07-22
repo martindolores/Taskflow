@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using FluentValidation;
@@ -101,8 +102,12 @@ app.UseCors(CorsPolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 
+var appVersion = typeof(Program).Assembly
+    .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+    ?? "unknown";
+
 app.MapGet("/", () => Results.Ok());
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", version = appVersion }));
 
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
