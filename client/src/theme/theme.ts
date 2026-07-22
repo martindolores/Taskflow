@@ -31,6 +31,15 @@ declare module '@mui/material/styles' {
 
 const fontFamily = ['DM Sans', 'system-ui', 'sans-serif'].join(', ')
 
+// Responsive breakpoints: MUI defaults (xs:0, sm:600, md:900, lg:1200, xl:1536),
+// no custom values needed. Mobile/desktop branch in screens goes through
+// useIsMobile() (client/src/hooks/useIsMobile.ts), not a raw useMediaQuery call.
+//
+//   xs (<600px, phone)     sidebar -> bottom nav bar; tables -> stacked cards;
+//                          dialogs -> fullScreen; metadata panels -> inline sections
+//   sm (600-900px, tablet) same treatment as xs (reflows still needed, fixed
+//                          table columns don't fit); two-column screens stack
+//   md+ (>=900px)          current desktop layout, unchanged
 export const theme = createTheme({
   palette: {
     mode: 'dark',
