@@ -68,7 +68,7 @@ jobs:
 
       - name: Build backend
         working-directory: server
-        run: dotnet build --no-restore
+        run: dotnet build --no-restore -c Release
 
       - name: Install dotnet-ef
         run: dotnet tool install --global dotnet-ef
@@ -82,10 +82,18 @@ jobs:
       - name: Start backend
         working-directory: server
         run: |
-          dotnet run --no-build --project src/TaskFlow.Api &
+          dotnet run --no-build -c Release --project src/TaskFlow.Api &
           for i in $(seq 1 20); do
             if curl -fsS http://localhost:5151/health; then
               echo "Backend is healthy"
+              # Force JIT/EF warm-up of the auth + JWT-validation code paths the e2e
+              # suite hits immediately, so the first real request isn't the one paying
+              # first-hit compilation cost under load.
+              curl -fsS -o /dev/null -X POST http://localhost:5151/api/auth/login \
+                -H 'Content-Type: application/json' \
+                -d '{"email":"warmup@example.com","password":"warmup"}' || true
+              curl -fsS -o /dev/null http://localhost:5151/api/users/me \
+                -H 'Authorization: Bearer warmup' || true
               exit 0
             fi
             echo "Waiting for backend to become healthy... ($i/20)"

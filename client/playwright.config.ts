@@ -10,6 +10,9 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
+  // Serialize in CI: parallel workers pile onto the same single-process, Debug-mode backend
+  // sharing a 2-core runner with Postgres, which caused intermittent dropped connections.
+  workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL,
