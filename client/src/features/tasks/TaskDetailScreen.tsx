@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -59,6 +61,8 @@ export function TaskDetailScreen() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const isAdmin = user?.role === 'Admin'
+  const theme = useTheme()
+  const stacked = useMediaQuery(theme.breakpoints.down('md'))
 
   const taskQuery = useTaskQuery(taskId)
   const membersQuery = useMembersQuery()
@@ -98,7 +102,13 @@ export function TaskDetailScreen() {
     return (
       <Box sx={{ p: '36px 40px', maxWidth: 900 }}>
         <Skeleton variant="text" width={120} height={32} sx={{ mb: 3 }} />
-        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 248px', gap: '22px' }}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: stacked ? '1fr' : '1fr 248px',
+            gap: '22px',
+          }}
+        >
           <Box>
             <Skeleton variant="text" width="70%" height={40} sx={{ mb: 2 }} />
             <Skeleton variant="rounded" height={110} sx={{ mb: 2.25 }} />
@@ -126,6 +136,91 @@ export function TaskDetailScreen() {
   const comments = commentsQuery.data ?? []
   const canDeleteTask = isAdmin || task.createdById === user?.id
 
+  const metadataPanel = (
+    <Paper
+      sx={{
+        borderRadius: '10px',
+        p: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2.25,
+        ...(stacked ? { mb: 2.25 } : { position: 'sticky', top: 36 }),
+      }}
+    >
+      <Box>
+        <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
+          Status
+        </Typography>
+        <StatusChip status={task.status} />
+      </Box>
+
+      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
+        <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
+          Priority
+        </Typography>
+        <PriorityLabel priority={task.priority} />
+      </Box>
+
+      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
+        <Typography variant="overline" sx={{ display: 'block', mb: 1.125 }}>
+          Assignee
+        </Typography>
+        {assignee ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <UserAvatar name={`${assignee.firstName} ${assignee.lastName}`} size={24} />
+            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+              {assignee.firstName} {assignee.lastName}
+            </Typography>
+          </Box>
+        ) : (
+          <Typography sx={{ fontSize: 13, color: 'text.disabled' }}>Unassigned</Typography>
+        )}
+      </Box>
+
+      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
+        <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
+          Due Date
+        </Typography>
+        <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
+          {formatDueDate(task.dueDate)}
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          borderTop: '1px solid rgba(255,255,255,0.055)',
+          pt: 2.25,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+        }}
+      >
+        <Button
+          onClick={() => setEditModalOpen(true)}
+          sx={{
+            bgcolor: 'rgba(255,255,255,0.05)',
+            color: 'text.primary',
+            border: '1px solid rgba(255,255,255,0.09)',
+          }}
+        >
+          Edit task
+        </Button>
+        {canDeleteTask && (
+          <Button
+            onClick={() => setDeleteConfirmOpen(true)}
+            sx={{
+              bgcolor: 'rgba(239,68,68,0.07)',
+              color: 'error.main',
+              border: '1px solid rgba(239,68,68,0.14)',
+            }}
+          >
+            Delete task
+          </Button>
+        )}
+      </Box>
+    </Paper>
+  )
+
   return (
     <Box sx={{ p: '36px 40px', maxWidth: 900 }}>
       <Button
@@ -136,7 +231,12 @@ export function TaskDetailScreen() {
       </Button>
 
       <Box
-        sx={{ display: 'grid', gridTemplateColumns: '1fr 248px', gap: '22px', alignItems: 'start' }}
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: stacked ? '1fr' : '1fr 248px',
+          gap: '22px',
+          alignItems: 'start',
+        }}
       >
         <Box>
           <Typography variant="h1" sx={{ fontSize: 23, mb: 1.625, lineHeight: 1.28 }}>
@@ -149,6 +249,8 @@ export function TaskDetailScreen() {
               Due {formatDueDate(task.dueDate)}
             </Typography>
           </Box>
+
+          {stacked && metadataPanel}
 
           <Paper sx={{ borderRadius: '10px', p: '20px 22px', mb: 2.25 }}>
             <Typography variant="overline" sx={{ display: 'block', mb: 1.5 }}>
@@ -269,89 +371,7 @@ export function TaskDetailScreen() {
           </Paper>
         </Box>
 
-        <Paper
-          sx={{
-            borderRadius: '10px',
-            p: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2.25,
-            position: 'sticky',
-            top: 36,
-          }}
-        >
-          <Box>
-            <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
-              Status
-            </Typography>
-            <StatusChip status={task.status} />
-          </Box>
-
-          <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
-            <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
-              Priority
-            </Typography>
-            <PriorityLabel priority={task.priority} />
-          </Box>
-
-          <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
-            <Typography variant="overline" sx={{ display: 'block', mb: 1.125 }}>
-              Assignee
-            </Typography>
-            {assignee ? (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <UserAvatar name={`${assignee.firstName} ${assignee.lastName}`} size={24} />
-                <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
-                  {assignee.firstName} {assignee.lastName}
-                </Typography>
-              </Box>
-            ) : (
-              <Typography sx={{ fontSize: 13, color: 'text.disabled' }}>Unassigned</Typography>
-            )}
-          </Box>
-
-          <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
-            <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
-              Due Date
-            </Typography>
-            <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
-              {formatDueDate(task.dueDate)}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              borderTop: '1px solid rgba(255,255,255,0.055)',
-              pt: 2.25,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 1,
-            }}
-          >
-            <Button
-              onClick={() => setEditModalOpen(true)}
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.05)',
-                color: 'text.primary',
-                border: '1px solid rgba(255,255,255,0.09)',
-              }}
-            >
-              Edit task
-            </Button>
-            {canDeleteTask && (
-              <Button
-                onClick={() => setDeleteConfirmOpen(true)}
-                sx={{
-                  bgcolor: 'rgba(239,68,68,0.07)',
-                  color: 'error.main',
-                  border: '1px solid rgba(239,68,68,0.14)',
-                }}
-              >
-                Delete task
-              </Button>
-            )}
-          </Box>
-        </Paper>
+        {!stacked && metadataPanel}
       </Box>
 
       <TaskFormModal
