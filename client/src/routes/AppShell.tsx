@@ -1,11 +1,16 @@
 import { useState, type MouseEvent, type ReactNode } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { alpha } from '@mui/material/styles'
+import AppBar from '@mui/material/AppBar'
+import BottomNavigation from '@mui/material/BottomNavigation'
+import BottomNavigationAction from '@mui/material/BottomNavigationAction'
 import Box from '@mui/material/Box'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { useAuth } from '@/features/auth/useAuth'
+import { useIsMobile } from '@/hooks/useIsMobile'
 
 const navItems: { label: string; to: string; icon: ReactNode }[] = [
   {
@@ -53,6 +58,9 @@ const navItems: { label: string; to: string; icon: ReactNode }[] = [
 
 export function AppShell() {
   const { user, logout } = useAuth()
+  const isMobile = useIsMobile()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
 
   function openMenu(event: MouseEvent<HTMLElement>) {
@@ -69,6 +77,108 @@ export function AppShell() {
   }
 
   const initials = user ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase() : ''
+
+  const profileMenu = (
+    <Menu
+      anchorEl={menuAnchor}
+      open={!!menuAnchor}
+      onClose={closeMenu}
+      anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+      transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+    >
+      <MenuItem onClick={() => void handleLogout()}>Log out</MenuItem>
+    </Menu>
+  )
+
+  if (isMobile) {
+    const activeNavValue =
+      navItems.find((item) => location.pathname.startsWith(item.to))?.to ?? navItems[0].to
+
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
+        <AppBar
+          position="static"
+          sx={{
+            bgcolor: '#0c0c10',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.055)',
+          }}
+        >
+          <Toolbar sx={{ gap: 1.25, minHeight: 52 }}>
+            <Box
+              sx={{
+                width: 26,
+                height: 26,
+                bgcolor: 'primary.main',
+                borderRadius: '7px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <rect x="2" y="2" width="5" height="5" rx="1.2" fill="white" />
+                <rect x="9" y="2" width="5" height="5" rx="1.2" fill="white" opacity={0.55} />
+                <rect x="2" y="9" width="5" height="5" rx="1.2" fill="white" opacity={0.55} />
+                <rect x="9" y="9" width="5" height="5" rx="1.2" fill="white" />
+              </svg>
+            </Box>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, letterSpacing: '-0.2px', flex: 1 }}>
+              Taskflow
+            </Typography>
+            <Box
+              onClick={openMenu}
+              sx={{
+                width: 30,
+                height: 30,
+                borderRadius: '50%',
+                backgroundImage: (theme) => theme.palette.avatarGradient,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 11,
+                fontWeight: 600,
+                flexShrink: 0,
+                cursor: 'pointer',
+              }}
+            >
+              {initials}
+            </Box>
+          </Toolbar>
+        </AppBar>
+
+        <Box component="main" sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+          <Outlet />
+        </Box>
+
+        <BottomNavigation
+          showLabels
+          value={activeNavValue}
+          onChange={(_event, value: string) => navigate(value)}
+          sx={{
+            bgcolor: '#0c0c10',
+            borderTop: '1px solid rgba(255, 255, 255, 0.055)',
+            height: 58,
+          }}
+        >
+          {navItems.map((item) => (
+            <BottomNavigationAction
+              key={item.to}
+              label={item.label}
+              value={item.to}
+              icon={item.icon}
+              sx={{
+                color: '#71717a',
+                '&.Mui-selected': { color: (theme) => theme.palette.nav.activeText },
+              }}
+            />
+          ))}
+        </BottomNavigation>
+
+        {profileMenu}
+      </Box>
+    )
+  }
 
   return (
     <Box sx={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -263,15 +373,7 @@ export function AppShell() {
               />
             </Box>
           </Box>
-          <Menu
-            anchorEl={menuAnchor}
-            open={!!menuAnchor}
-            onClose={closeMenu}
-            anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-            transformOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          >
-            <MenuItem onClick={() => void handleLogout()}>Log out</MenuItem>
-          </Menu>
+          {profileMenu}
         </Box>
       </Box>
 
