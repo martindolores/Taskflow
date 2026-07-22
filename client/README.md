@@ -45,11 +45,11 @@ npm run dev       # http://localhost:5173
 ## Other commands
 
 ```bash
-npm run build          # tsc -b && vite build
-npm run lint            # oxlint
-npm run format           # prettier --write .
-npm run format:check      # prettier --check . (CI gate)
-npm run preview           # serve the production build locally
+npm run build             # tsc -b && vite build
+npm run lint               # oxlint
+npm run format              # prettier --write .
+npm run format:check         # prettier --check . (CI gate)
+npm run preview              # serve the production build locally
+npm run test:contracts       # Playwright request-contract tests (mocked backend, no server needed)
+npm run test:contracts:ui    # same, in Playwright's UI mode
 ```
-
-No test runner is wired up yet — Playwright e2e is planned for a later chunk (`PR-F11` in `../docs/frontend-plan.md`).

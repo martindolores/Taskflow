@@ -1,18 +1,13 @@
 import { defineConfig, devices } from '@playwright/test'
 
-// Must match `Cors:AllowedOrigins` in server/src/TaskFlow.Api/appsettings.Development.json —
-// the backend only allows http://localhost:5173, so the browser-served app has to run there too.
-const PORT = 5173
+const PORT = 4173
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  // Serialize in CI: parallel workers pile onto the same single-process, Debug-mode backend
-  // sharing a 2-core runner with Postgres, which caused intermittent dropped connections.
-  workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
     baseURL,

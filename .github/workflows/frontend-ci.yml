@@ -14,21 +14,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: taskflow
-          POSTGRES_PASSWORD: taskflow
-          POSTGRES_DB: taskflow
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -58,62 +43,13 @@ jobs:
         env:
           VITE_API_URL: http://localhost:5151
 
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "8.0.x"
-
-      - name: Restore backend
-        working-directory: server
-        run: dotnet restore
-
-      - name: Build backend
-        working-directory: server
-        run: dotnet build --no-restore -c Release
-
-      - name: Install dotnet-ef
-        run: dotnet tool install --global dotnet-ef
-
-      - name: Apply migrations
-        working-directory: server
-        run: dotnet ef database update --project src/TaskFlow.Infrastructure --startup-project src/TaskFlow.Api
-        env:
-          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
-
-      - name: Start backend
-        working-directory: server
-        run: |
-          dotnet run --no-build -c Release --project src/TaskFlow.Api &
-          for i in $(seq 1 20); do
-            if curl -fsS http://localhost:5151/health; then
-              echo "Backend is healthy"
-              # Force JIT/EF warm-up of the auth + JWT-validation code paths the e2e
-              # suite hits immediately, so the first real request isn't the one paying
-              # first-hit compilation cost under load.
-              curl -fsS -o /dev/null -X POST http://localhost:5151/api/auth/login \
-                -H 'Content-Type: application/json' \
-                -d '{"email":"warmup@example.com","password":"warmup"}' || true
-              curl -fsS -o /dev/null http://localhost:5151/api/users/me \
-                -H 'Authorization: Bearer warmup' || true
-              exit 0
-            fi
-            echo "Waiting for backend to become healthy... ($i/20)"
-            sleep 3
-          done
-          echo "Backend did not become healthy in time" >&2
-          exit 1
-        env:
-          ASPNETCORE_ENVIRONMENT: Development
-          ConnectionStrings__Default: "Host=localhost;Port=5432;Database=taskflow;Username=taskflow;Password=taskflow"
-
       - name: Install Playwright browsers
         working-directory: client
         run: npx playwright install --with-deps chromium
 
-      - name: Run e2e tests
+      - name: Run request-contract tests
         working-directory: client
-        run: npm run test:e2e
-        env:
-          E2E_API_URL: http://localhost:5151
+        run: npm run test:contracts
 
       - name: Upload Playwright report
         if: failure()

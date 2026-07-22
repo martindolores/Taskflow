@@ -177,7 +177,7 @@ Built directly against the responsive Dashboard (PR-M7) and Task Detail (PR-M3) 
 
 ### PR-M11 — Mobile e2e coverage ⬜
 
-- Extend the existing Playwright setup (`client/e2e/`, from legacy PR-F11) with a mobile viewport project (Playwright's built-in device presets, e.g. `Pixel 5` or a plain `375x667` viewport)
+- Extend the existing Playwright setup (`client/tests/`, reworked from legacy PR-F11's real-backend e2e suite into mocked-backend request-contract tests) with a mobile viewport project (Playwright's built-in device presets, e.g. `Pixel 5` or a plain `375x667` viewport)
 - Re-run the core flows (task CRUD, org settings, accept-invitation) against the mobile viewport project — not full duplication, just the specs that touch the reworked screens (List, Detail, Dashboard, Settings, Task form)
 - Wire into `frontend-ci.yml` as an additional `playwright test --project=mobile` step (or matrix entry)
 
