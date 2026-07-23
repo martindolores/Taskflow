@@ -11,6 +11,7 @@ export interface TaskListItem {
   assigneeId: string | null
   assigneeName: string | null
   dueDate: string | null
+  projectId: string | null
   createdAt: string
 }
 
@@ -29,6 +30,7 @@ export interface TaskDetail {
   priority: TaskPriority
   assigneeId: string | null
   dueDate: string | null
+  projectId: string | null
   createdById: string
   createdAt: string
   updatedAt: string
@@ -46,6 +48,7 @@ export interface TaskFormPayload {
   priority: TaskPriority
   assigneeId?: string
   dueDate?: string
+  projectId?: string
 }
 
 export interface UpdateTaskPayload extends TaskFormPayload {

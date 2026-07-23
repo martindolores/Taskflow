@@ -10,6 +10,9 @@ import MenuItem from '@mui/material/MenuItem'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { useAuth } from '@/features/auth/useAuth'
+import { NewProjectModal } from '@/features/projects/NewProjectModal'
+import { useProjectsQuery } from '@/features/projects/projectsQueries'
+import { useTasksQuery } from '@/features/tasks/tasksQueries'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
 const navItems: { label: string; to: string; icon: ReactNode }[] = [
@@ -40,6 +43,18 @@ const navItems: { label: string; to: string; icon: ReactNode }[] = [
     ),
   },
   {
+    label: 'Projects',
+    to: '/projects',
+    icon: (
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+        <rect x="1.5" y="1.5" width="5.5" height="7" rx="1.5" fill="currentColor" opacity={0.9} />
+        <rect x="9" y="1.5" width="5.5" height="4" rx="1.5" fill="currentColor" opacity={0.4} />
+        <rect x="9" y="7.5" width="5.5" height="7" rx="1.5" fill="currentColor" opacity={0.4} />
+        <rect x="1.5" y="10.5" width="5.5" height="4" rx="1.5" fill="currentColor" opacity={0.4} />
+      </svg>
+    ),
+  },
+  {
     label: 'Settings',
     to: '/settings',
     icon: (
@@ -62,6 +77,18 @@ export function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null)
+  const [newProjectOpen, setNewProjectOpen] = useState(false)
+
+  // The desktop sidebar's Projects section — skipped on mobile where there's no persistent sidebar.
+  const projectsQuery = useProjectsQuery({ enabled: !isMobile })
+  const tasksQuery = useTasksQuery({ page: 1, pageSize: 100 }, { enabled: !isMobile })
+
+  const taskCountByProject = new Map<string, number>()
+  for (const task of tasksQuery.data?.items ?? []) {
+    if (task.projectId) {
+      taskCountByProject.set(task.projectId, (taskCountByProject.get(task.projectId) ?? 0) + 1)
+    }
+  }
 
   function openMenu(event: MouseEvent<HTMLElement>) {
     setMenuAnchor(event.currentTarget)
@@ -295,6 +322,86 @@ export function AppShell() {
           ))}
         </Box>
 
+        <Box sx={{ mt: 2.75, px: 1 }}>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
+          >
+            <Typography
+              sx={{
+                fontSize: 10.5,
+                fontWeight: 600,
+                color: '#3f3f52',
+                textTransform: 'uppercase',
+                letterSpacing: '0.7px',
+              }}
+            >
+              Projects
+            </Typography>
+            <Box
+              component="button"
+              type="button"
+              aria-label="New project"
+              title="New project"
+              onClick={() => setNewProjectOpen(true)}
+              sx={{
+                background: 'none',
+                border: 'none',
+                color: '#3f3f52',
+                cursor: 'pointer',
+                p: 0,
+                lineHeight: 1,
+                fontSize: 16,
+                display: 'flex',
+                alignItems: 'center',
+                '&:hover': { color: '#9898b0' },
+              }}
+            >
+              +
+            </Box>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {projectsQuery.data?.map((project) => (
+              <Box
+                key={project.id}
+                onClick={() => navigate(`/tasks?project=${project.id}`)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  padding: '6px 4px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.04)' },
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 7,
+                    height: 7,
+                    borderRadius: '2px',
+                    flexShrink: 0,
+                    bgcolor: project.color,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    flex: 1,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {project.name}
+                </Typography>
+                <Typography sx={{ fontSize: 11, color: '#3f3f52' }}>
+                  {taskCountByProject.get(project.id) ?? 0}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+
         <Box sx={{ flex: 1 }} />
 
         <Box
@@ -380,6 +487,8 @@ export function AppShell() {
       <Box component="main" sx={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
         <Outlet />
       </Box>
+
+      <NewProjectModal open={newProjectOpen} onClose={() => setNewProjectOpen(false)} />
     </Box>
   )
 }

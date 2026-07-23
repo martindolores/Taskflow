@@ -9,5 +9,6 @@ public sealed class CreateProjectRequestValidator : AbstractValidator<CreateProj
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Color).NotEmpty().Matches("^#[0-9A-Fa-f]{6}$");
+        RuleFor(x => x.Description).MaximumLength(280);
     }
 }

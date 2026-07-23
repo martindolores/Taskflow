@@ -13,7 +13,7 @@ public sealed class ProjectService(AppDbContext db, ICurrentUserService currentU
     public async Task<IReadOnlyList<ProjectResponse>> GetProjectsAsync(CancellationToken cancellationToken) =>
         await db.Projects
             .OrderBy(p => p.Name)
-            .Select(p => new ProjectResponse(p.Id, p.Name, p.Color))
+            .Select(p => new ProjectResponse(p.Id, p.Name, p.Color, p.Description))
             .ToListAsync(cancellationToken);
 
     public async Task<ProjectResponse> CreateProjectAsync(CreateProjectRequest request, CancellationToken cancellationToken)
@@ -24,12 +24,13 @@ public sealed class ProjectService(AppDbContext db, ICurrentUserService currentU
             OrganizationId = currentUserService.OrganizationId!.Value,
             Name = request.Name,
             Color = request.Color,
+            Description = request.Description,
         };
 
         db.Projects.Add(project);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new ProjectResponse(project.Id, project.Name, project.Color);
+        return new ProjectResponse(project.Id, project.Name, project.Color, project.Description);
     }
 
     public async Task DeleteProjectAsync(Guid projectId, CancellationToken cancellationToken)

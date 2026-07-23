@@ -12,6 +12,7 @@ public class ProjectConfiguration : IEntityTypeConfiguration<Project>
 
         builder.Property(p => p.Name).HasMaxLength(100).IsRequired();
         builder.Property(p => p.Color).HasMaxLength(7).IsRequired();
+        builder.Property(p => p.Description).HasMaxLength(280);
         builder.Property(p => p.CreatedAt).HasDefaultValueSql("now()");
 
         builder.HasIndex(p => p.OrganizationId);

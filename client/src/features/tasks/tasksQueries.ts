@@ -9,11 +9,12 @@ export const taskKeys = {
   detail: (id: string) => ['tasks', 'detail', id] as const,
 }
 
-export function useTasksQuery(params: TaskListParams) {
+export function useTasksQuery(params: TaskListParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: taskKeys.list(params),
     queryFn: () => tasksApi.getTasks(params),
     placeholderData: (previousData) => previousData,
+    enabled: options?.enabled ?? true,
   })
 }
 

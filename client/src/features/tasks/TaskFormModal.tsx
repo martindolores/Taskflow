@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography'
 import { applyFieldErrors, extractErrorMessage } from '@/api/errors'
 import type { TaskDetail } from '@/api/tasksApi'
 import type { Member } from '@/api/organizationApi'
+import type { Project } from '@/api/projectsApi'
 import { LabeledField } from '@/components/LabeledField'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { useCreateTaskMutation, useUpdateTaskMutation } from './tasksQueries'
@@ -28,6 +29,7 @@ function defaultValues(task?: TaskDetail): TaskFormValues {
     priority: task?.priority ?? 'Medium',
     assigneeId: task?.assigneeId ?? null,
     dueDate: task?.dueDate ?? '',
+    projectId: task?.projectId ?? null,
   }
 }
 
@@ -35,11 +37,19 @@ interface TaskFormModalProps {
   open: boolean
   onClose: () => void
   members: Member[]
+  projects: Project[]
   mode: 'create' | 'edit'
   task?: TaskDetail
 }
 
-export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormModalProps) {
+export function TaskFormModal({
+  open,
+  onClose,
+  members,
+  projects,
+  mode,
+  task,
+}: TaskFormModalProps) {
   const isMobile = useIsMobile()
   const createTask = useCreateTaskMutation()
   const updateTask = useUpdateTaskMutation()
@@ -73,6 +83,7 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
       priority: values.priority,
       assigneeId: values.assigneeId ?? undefined,
       dueDate: values.dueDate || undefined,
+      projectId: values.projectId ?? undefined,
     }
     try {
       if (mode === 'edit' && task) {
@@ -181,6 +192,28 @@ export function TaskFormModal({ open, onClose, members, mode, task }: TaskFormMo
               {...register('dueDate')}
             />
           </Box>
+
+          <Controller
+            control={control}
+            name="projectId"
+            render={({ field }) => (
+              <LabeledField
+                label="Project"
+                select
+                value={field.value ?? ''}
+                onChange={(event) => field.onChange(event.target.value || null)}
+                onBlur={field.onBlur}
+                ref={field.ref}
+              >
+                <MenuItem value="">No project</MenuItem>
+                {projects.map((project) => (
+                  <MenuItem key={project.id} value={project.id}>
+                    {project.name}
+                  </MenuItem>
+                ))}
+              </LabeledField>
+            )}
+          />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3 }}>
           <Button onClick={onClose} sx={{ color: 'text.secondary' }}>

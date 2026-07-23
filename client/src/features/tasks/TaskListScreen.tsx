@@ -13,6 +13,7 @@ import { StatusChip } from '@/components/StatusChip'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/useAuth'
 import { useMembersQuery } from '@/features/organization/organizationQueries'
+import { useProjectsQuery } from '@/features/projects/projectsQueries'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { TaskFormModal } from './TaskFormModal'
 import { useTasksQuery } from './tasksQueries'
@@ -54,13 +55,24 @@ export function TaskListScreen() {
   const [search, setSearch] = useState('')
   const [createModalOpen, setCreateModalOpen] = useState(false)
 
+  const projectFilter = searchParams.get('project')
+
   const tasksQuery = useTasksQuery({ page, pageSize: PAGE_SIZE })
   const membersQuery = useMembersQuery()
+  const projectsQuery = useProjectsQuery()
+
+  const projectById = useMemo(
+    () => new Map((projectsQuery.data ?? []).map((project) => [project.id, project])),
+    [projectsQuery.data],
+  )
 
   const filteredItems = useMemo(() => {
     const items = tasksQuery.data?.items ?? []
     const query = search.trim().toLowerCase()
     return items.filter((task) => {
+      if (projectFilter && task.projectId !== projectFilter) {
+        return false
+      }
       if (statusFilter !== 'all' && task.status !== statusFilter) {
         return false
       }
@@ -72,10 +84,16 @@ export function TaskListScreen() {
         (task.assigneeName ?? '').toLowerCase().includes(query)
       )
     })
-  }, [tasksQuery.data, statusFilter, search])
+  }, [tasksQuery.data, projectFilter, statusFilter, search])
 
   const total = tasksQuery.data?.total ?? 0
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
+
+  const activeProject = projectFilter ? projectById.get(projectFilter) : undefined
+  const heading = activeProject ? activeProject.name : 'Tasks'
+  const subheading = activeProject
+    ? `${filteredItems.length} tasks · ${activeProject.name}`
+    : `${total} tasks · ${user?.organizationName}`
 
   return (
     <Box sx={{ p: '36px 40px' }}>
@@ -88,9 +106,9 @@ export function TaskListScreen() {
         }}
       >
         <Box>
-          <Typography variant="h1">Tasks</Typography>
+          <Typography variant="h1">{heading}</Typography>
           <Typography variant="body2" sx={{ color: 'text.disabled', mt: 0.375 }}>
-            {total} tasks · {user?.organizationName}
+            {subheading}
           </Typography>
         </Box>
         <Button variant="contained" onClick={() => setCreateModalOpen(true)}>
@@ -233,6 +251,11 @@ export function TaskListScreen() {
                 >
                   {task.title}
                 </Typography>
+                {task.projectId && projectById.has(task.projectId) && (
+                  <Typography sx={{ fontSize: 11.5, color: 'text.disabled', mt: -0.5 }}>
+                    {projectById.get(task.projectId)!.name}
+                  </Typography>
+                )}
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <StatusChip status={task.status} />
                   <PriorityLabel priority={task.priority} />
@@ -286,19 +309,25 @@ export function TaskListScreen() {
                   '&:hover': { bgcolor: 'rgba(255,255,255,0.025)' },
                 }}
               >
-                <Typography
-                  sx={{
-                    fontSize: 13.5,
-                    fontWeight: 500,
-                    color: 'text.primary',
-                    pr: 2.25,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {task.title}
-                </Typography>
+                <Box sx={{ pr: 2.25, minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 13.5,
+                      fontWeight: 500,
+                      color: 'text.primary',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {task.title}
+                  </Typography>
+                  {task.projectId && projectById.has(task.projectId) && (
+                    <Typography sx={{ fontSize: 11.5, color: 'text.disabled', mt: 0.25 }}>
+                      {projectById.get(task.projectId)!.name}
+                    </Typography>
+                  )}
+                </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   {task.assigneeName ? (
                     <>
@@ -373,6 +402,7 @@ export function TaskListScreen() {
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         members={membersQuery.data ?? []}
+        projects={projectsQuery.data ?? []}
         mode="create"
       />
     </Box>

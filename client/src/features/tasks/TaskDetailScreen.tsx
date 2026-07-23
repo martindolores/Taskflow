@@ -22,6 +22,7 @@ import { StatusChip } from '@/components/StatusChip'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/useAuth'
 import { useMembersQuery } from '@/features/organization/organizationQueries'
+import { useProjectsQuery } from '@/features/projects/projectsQueries'
 import {
   useCreateCommentMutation,
   useCommentsQuery,
@@ -66,6 +67,7 @@ export function TaskDetailScreen() {
 
   const taskQuery = useTaskQuery(taskId)
   const membersQuery = useMembersQuery()
+  const projectsQuery = useProjectsQuery()
   const commentsQuery = useCommentsQuery(taskId)
 
   const createComment = useCreateCommentMutation(taskId)
@@ -133,6 +135,7 @@ export function TaskDetailScreen() {
 
   const members = membersQuery.data ?? []
   const assignee = members.find((member) => member.id === task.assigneeId)
+  const project = projectsQuery.data?.find((item) => item.id === task.projectId)
   const comments = commentsQuery.data ?? []
   const canDeleteTask = isAdmin || task.createdById === user?.id
 
@@ -183,6 +186,15 @@ export function TaskDetailScreen() {
         </Typography>
         <Typography sx={{ fontSize: 13, color: 'text.secondary' }}>
           {formatDueDate(task.dueDate)}
+        </Typography>
+      </Box>
+
+      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
+        <Typography variant="overline" sx={{ display: 'block', mb: 0.875 }}>
+          Project
+        </Typography>
+        <Typography sx={{ fontSize: 13, color: project ? 'text.secondary' : 'text.disabled' }}>
+          {project ? project.name : 'No project'}
         </Typography>
       </Box>
 
@@ -239,6 +251,24 @@ export function TaskDetailScreen() {
         }}
       >
         <Box>
+          {project && (
+            <Box
+              component="span"
+              sx={{
+                display: 'inline-block',
+                mb: 1.625,
+                bgcolor: 'rgba(99, 102, 241, 0.1)',
+                color: 'primary.light',
+                fontSize: 11,
+                fontWeight: 600,
+                px: '9px',
+                py: '3px',
+                borderRadius: '5px',
+              }}
+            >
+              {project.name}
+            </Box>
+          )}
           <Typography variant="h1" sx={{ fontSize: 23, mb: 1.625, lineHeight: 1.28 }}>
             {task.title}
           </Typography>
@@ -378,6 +408,7 @@ export function TaskDetailScreen() {
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}
         members={members}
+        projects={projectsQuery.data ?? []}
         mode="edit"
         task={task}
       />

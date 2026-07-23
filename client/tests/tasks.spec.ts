@@ -12,6 +12,7 @@ const fakeTask = {
   priority: 'Medium',
   assigneeId: null,
   dueDate: null,
+  projectId: null,
   createdById: fakeUser.id,
   createdAt: '2026-01-01T00:00:00Z',
   updatedAt: '2026-01-01T00:00:00Z',
@@ -20,6 +21,7 @@ const fakeTask = {
 test('creating a task sends a request matching CreateTaskRequest', async ({ page }) => {
   await mockJson(page, 'GET', '/api/tasks', emptyTaskList)
   await mockJson(page, 'GET', '/api/organization/members', fakeMembers)
+  await mockJson(page, 'GET', '/api/projects', [])
   await signInWithFakeSession(page)
   await page.goto('/tasks')
 
@@ -46,6 +48,7 @@ test('editing a task sends a request matching UpdateTaskRequest', async ({ page 
   await mockJson(page, 'GET', '/api/tasks/task-1', fakeTask)
   await mockJson(page, 'GET', '/api/tasks/task-1/comments', [])
   await mockJson(page, 'GET', '/api/organization/members', fakeMembers)
+  await mockJson(page, 'GET', '/api/projects', [])
   await signInWithFakeSession(page)
   await page.goto(`/tasks/${taskId}`)
 
@@ -78,6 +81,7 @@ test('posting a comment sends a request matching CreateCommentRequest', async ({
   await mockJson(page, 'GET', '/api/tasks/task-1', fakeTask)
   await mockJson(page, 'GET', '/api/tasks/task-1/comments', [])
   await mockJson(page, 'GET', '/api/organization/members', fakeMembers)
+  await mockJson(page, 'GET', '/api/projects', [])
   await signInWithFakeSession(page)
   await page.goto(`/tasks/${taskId}`)
 

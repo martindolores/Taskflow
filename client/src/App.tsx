@@ -9,6 +9,7 @@ import { AcceptInvitationScreen } from '@/features/auth/AcceptInvitationScreen'
 import { AuthProvider } from '@/features/auth/AuthContext'
 import { AuthScreen } from '@/features/auth/AuthScreen'
 import { OrganizationSettingsScreen } from '@/features/organization/OrganizationSettingsScreen'
+import { ProjectsScreen } from '@/features/projects/ProjectsScreen'
 import { DashboardScreen } from '@/features/tasks/DashboardScreen'
 import { TaskDetailScreen } from '@/features/tasks/TaskDetailScreen'
 import { TaskListScreen } from '@/features/tasks/TaskListScreen'
@@ -38,6 +39,7 @@ function App() {
                     <Route path="/dashboard" element={<DashboardScreen />} />
                     <Route path="/tasks" element={<TaskListScreen />} />
                     <Route path="/tasks/:id" element={<TaskDetailScreen />} />
+                    <Route path="/projects" element={<ProjectsScreen />} />
                     <Route path="/settings" element={<OrganizationSettingsScreen />} />
                   </Route>
                 </Route>

@@ -81,6 +81,33 @@ public class ProjectEndpointsTests(WebApplicationFactory<Program> factory) : ICl
     }
 
     [Fact]
+    public async Task CreateProject_WithDescription_RoundTripsThroughGet()
+    {
+        var admin = await RegisterAdminAsync();
+
+        var createResponse = await admin.Client.PostAsJsonAsync("/api/projects", new CreateProjectRequest("Marketing", "#FF5733", "Campaigns and brand work"));
+        Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProjectResponse>(JsonOptions);
+        Assert.Equal("Campaigns and brand work", created!.Description);
+
+        var listResponse = await admin.Client.GetAsync("/api/projects");
+        var body = await listResponse.Content.ReadFromJsonAsync<List<ProjectResponse>>(JsonOptions);
+        Assert.Equal("Campaigns and brand work", body!.Single().Description);
+    }
+
+    [Fact]
+    public async Task CreateProject_WithoutDescription_ReturnsNullDescription()
+    {
+        var admin = await RegisterAdminAsync();
+
+        var response = await admin.Client.PostAsJsonAsync("/api/projects", new CreateProjectRequest("Marketing", "#FF5733"));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ProjectResponse>(JsonOptions);
+        Assert.Null(body!.Description);
+    }
+
+    [Fact]
     public async Task CreateProject_AsMember_ReturnsForbidden()
     {
         var admin = await RegisterAdminAsync();

@@ -51,4 +51,24 @@ public class CreateProjectRequestValidatorTests
 
         Assert.False(result.IsValid);
     }
+
+    [Fact]
+    public void Validate_WithNullDescription_Succeeds()
+    {
+        var request = new CreateProjectRequest("Marketing", "#FF5733", Description: null);
+
+        var result = _validator.Validate(request);
+
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void Validate_WithDescriptionOverMaxLength_Fails()
+    {
+        var request = new CreateProjectRequest("Marketing", "#FF5733", new string('a', 281));
+
+        var result = _validator.Validate(request);
+
+        Assert.False(result.IsValid);
+    }
 }
