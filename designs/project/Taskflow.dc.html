@@ -129,6 +129,10 @@ a{color:inherit;text-decoration:none}
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4.5h12M2 8h9M2 11.5h6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
         Tasks
       </div>
+      <div onClick="{{ goToProjects }}" style="{{ navProjectsSty }}" style-hover="opacity:1">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="1.5" width="5.5" height="7" rx="1.5" fill="currentColor" opacity="0.9"></rect><rect x="9" y="1.5" width="5.5" height="4" rx="1.5" fill="currentColor" opacity="0.4"></rect><rect x="9" y="7.5" width="5.5" height="7" rx="1.5" fill="currentColor" opacity="0.4"></rect><rect x="1.5" y="10.5" width="5.5" height="4" rx="1.5" fill="currentColor" opacity="0.4"></rect></svg>
+        Projects
+      </div>
       <div onClick="{{ goToSettings }}" style="{{ navSettingsSty }}" style-hover="opacity:1">
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.2" fill="none" stroke="currentColor" stroke-width="1.4"></circle><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.76 3.76l1.06 1.06M11.18 11.18l1.06 1.06M12.24 3.76l-1.06 1.06M4.82 11.18l-1.06 1.06" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"></path></svg>
         Settings
@@ -137,20 +141,18 @@ a{color:inherit;text-decoration:none}
 
     <!-- Projects section -->
     <div style="margin-top:22px;padding:0 8px">
-      <div style="font-size:10.5px;font-weight:600;color:#3f3f52;text-transform:uppercase;letter-spacing:0.7px;margin-bottom:8px">Projects</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:10.5px;font-weight:600;color:#3f3f52;text-transform:uppercase;letter-spacing:0.7px">Projects</div>
+        <button onClick="{{ openNewProject }}" style="background:none;border:none;color:#3f3f52;cursor:pointer;padding:0;line-height:1;font-size:16px;display:flex;align-items:center" style-hover="color:#9898b0" title="New project">+</button>
+      </div>
       <div style="display:flex;flex-direction:column;gap:2px">
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
-          <div style="width:7px;height:7px;border-radius:2px;background:#6366f1;flex-shrink:0"></div>
-          <span style="font-size:13px;color:#71717a">Product</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
-          <div style="width:7px;height:7px;border-radius:2px;background:#22d3ee;flex-shrink:0"></div>
-          <span style="font-size:13px;color:#71717a">Engineering</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding:6px 2px;cursor:pointer">
-          <div style="width:7px;height:7px;border-radius:2px;background:#f59e0b;flex-shrink:0"></div>
-          <span style="font-size:13px;color:#71717a">Docs</span>
-        </div>
+        <sc-for list="{{ sidebarProjects }}" as="sp" hint-placeholder-count="3">
+          <div onClick="{{ sp.onClick }}" style="{{ sp.sty }}" style-hover="background:rgba(255,255,255,0.04)">
+            <div style="width:7px;height:7px;border-radius:2px;flex-shrink:0;background:{{ sp.color }}"></div>
+            <span style="font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sp.name }}</span>
+            <span style="font-size:11px;color:#3f3f52">{{ sp.count }}</span>
+          </div>
+        </sc-for>
       </div>
     </div>
 
@@ -257,8 +259,8 @@ a{color:inherit;text-decoration:none}
 
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
         <div>
-          <h1 style="font-size:21px;font-weight:600;letter-spacing:-0.4px">Tasks</h1>
-          <p style="font-size:13px;color:#71717a;margin-top:3px">{{ totalCnt }} tasks · Acme Inc.</p>
+          <h1 style="font-size:21px;font-weight:600;letter-spacing:-0.4px">{{ tasksHeading }}</h1>
+          <p style="font-size:13px;color:#71717a;margin-top:3px">{{ tasksSubheading }}</p>
         </div>
         <button onClick="{{ openNewTask }}" style="display:flex;align-items:center;gap:7px;background:#6366f1;color:white;border:none;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:500;cursor:pointer;flex-shrink:0">
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"></path></svg>
@@ -482,6 +484,65 @@ a{color:inherit;text-decoration:none}
     </div>
     </sc-if>
 
+    <!-- ─── PROJECTS ─── -->
+    <sc-if value="{{ isProjects }}" hint-placeholder-val="{{ false }}">
+    <div style="padding:36px 40px;max-width:1040px;animation:fadeIn 0.2s ease">
+
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px">
+        <div>
+          <h1 style="font-size:21px;font-weight:600;letter-spacing:-0.4px">Projects</h1>
+          <p style="font-size:13px;color:#71717a;margin-top:3px">{{ projectsCnt }} projects · Acme Inc.</p>
+        </div>
+        <button onClick="{{ openNewProject }}" style="display:flex;align-items:center;gap:7px;background:#6366f1;color:white;border:none;border-radius:8px;padding:9px 16px;font-size:13.5px;font-weight:500;cursor:pointer;flex-shrink:0">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" stroke-width="2" stroke-linecap="round"></path></svg>
+          New project
+        </button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <sc-for list="{{ projectCards }}" as="proj" hint-placeholder-count="3">
+          <div onClick="{{ proj.onClick }}" style="background:#111117;border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:22px;cursor:pointer;display:flex;flex-direction:column;gap:16px" style-hover="border-color:rgba(255,255,255,0.13)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="width:32px;height:32px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:{{ proj.colorBg }}">
+                  <div style="width:10px;height:10px;border-radius:2.5px;background:{{ proj.color }}"></div>
+                </div>
+                <span style="font-size:14px;font-weight:600;letter-spacing:-0.2px">{{ proj.name }}</span>
+              </div>
+            </div>
+            <p style="font-size:13px;color:#71717a;line-height:1.5;min-height:36px">{{ proj.description }}</p>
+            <div style="display:flex;gap:18px">
+              <div>
+                <div style="font-size:20px;font-weight:600;letter-spacing:-1px">{{ proj.total }}</div>
+                <div style="font-size:11.5px;color:#52526a;margin-top:1px">tasks</div>
+              </div>
+              <div>
+                <div style="font-size:20px;font-weight:600;letter-spacing:-1px;color:#f59e0b">{{ proj.inProgress }}</div>
+                <div style="font-size:11.5px;color:#52526a;margin-top:1px">in progress</div>
+              </div>
+              <div>
+                <div style="font-size:20px;font-weight:600;letter-spacing:-1px;color:#22c55e">{{ proj.done }}</div>
+                <div style="font-size:11.5px;color:#52526a;margin-top:1px">done</div>
+              </div>
+            </div>
+            <!-- Progress bar -->
+            <div style="height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
+              <div style="height:100%;border-radius:2px;background:{{ proj.color }};width:{{ proj.pct }}"></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex">
+                <sc-for list="{{ proj.avatars }}" as="av" hint-placeholder-count="2">
+                  <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,0.45),rgba(139,92,246,0.45));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;border:1.5px solid #111117;margin-right:-6px">{{ av }}</div>
+                </sc-for>
+              </div>
+              <span style="font-size:11.5px;color:#52526a">{{ proj.pct }} complete</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
     <!-- ─── NEW TASK MODAL ─── -->
     <sc-if value="{{ showNewTask }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeNewTask }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:fadeIn 0.15s ease">
@@ -534,6 +595,40 @@ a{color:inherit;text-decoration:none}
   </main>
 </div>
 </sc-if>
+
+<!-- ─── NEW PROJECT MODAL ─── -->
+<sc-if value="{{ showNewProject }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeNewProject }}" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(3px);animation:fadeIn 0.15s ease">
+  <div onClick="{{ stopPropagation }}" style="background:#111117;border:1px solid rgba(255,255,255,0.1);border-radius:13px;padding:28px 28px 24px;width:440px;max-width:calc(100vw - 32px);animation:fadeUp 0.2s ease">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px">
+      <h2 style="font-size:17px;font-weight:600;letter-spacing:-0.3px">New project</h2>
+      <button onClick="{{ closeNewProject }}" style="background:none;border:none;color:#52526a;cursor:pointer;padding:4px;border-radius:5px;line-height:1;font-size:18px" style-hover="color:#f0f0f6">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div>
+        <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Project name</label>
+        <input value="{{ newProjectName }}" onChange="{{ setNewProjectName }}" type="text" placeholder="e.g. Mobile App" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:6px">Description</label>
+        <input type="text" placeholder="Optional — what's this project about?" style="width:100%;background:#18181f;border:1px solid rgba(255,255,255,0.09);border-radius:8px;padding:10px 13px;font-size:14px;color:#f0f0f6">
+      </div>
+      <div>
+        <label style="display:block;font-size:12px;font-weight:500;color:#9898b0;margin-bottom:10px">Colour</label>
+        <div style="display:flex;gap:9px">
+          <sc-for list="{{ colorSwatches }}" as="swatch" hint-placeholder-count="6">
+            <div onClick="{{ swatch.onClick }}" style="width:28px;height:28px;border-radius:7px;cursor:pointer;background:{{ swatch.color }};outline:{{ swatch.outline }};outline-offset:2px" style-hover="opacity:0.85"></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:9px;margin-top:24px">
+      <button onClick="{{ closeNewProject }}" style="background:rgba(255,255,255,0.05);color:#9898b0;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer">Cancel</button>
+      <button onClick="{{ createProject }}" style="background:#6366f1;color:white;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer">Create project</button>
+    </div>
+  </div>
+</div>
+</sc-if>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
@@ -543,10 +638,22 @@ class Component extends DCLogic {
     selectedTaskId: 1,
     searchQuery: '',
     statusFilter: 'all',
+    projectFilter: null,
     showNewTask: false,
+    showNewProject: false,
+    newProjectName: '',
+    newProjectColor: '#6366f1',
     inviteEmail: '',
     inviteSuccess: false,
   };
+
+  projects = [
+    { id: 1, name: 'Product', color: '#6366f1', description: 'User-facing features, roadmap planning, and product discovery work.' },
+    { id: 2, name: 'Engineering', color: '#22d3ee', description: 'Infrastructure, APIs, tooling, and technical debt reduction.' },
+    { id: 3, name: 'Docs', color: '#f59e0b', description: 'Developer documentation, guides, changelogs, and help content.' },
+  ];
+
+  colorOptions = ['#6366f1','#22d3ee','#f59e0b','#22c55e','#f43f5e','#a78bfa'];
 
   tasks = [
     { id: 1, title: 'Redesign onboarding flow', assignee: 'Alex Chen', av: 'AC', status: 'in-progress', priority: 'high', due: 'Jul 25', project: 'Product', description: 'Rethink the entire new user onboarding experience to reduce drop-off and improve activation rates. Focus on progressive disclosure and contextual guidance — step by step, only surfacing what the user needs at each moment.' },
@@ -608,18 +715,55 @@ class Component extends DCLogic {
     const fActive = { ...fBase, background: 'rgba(99,102,241,0.12)', color: '#a5b4fc' };
     const fInactive = { ...fBase, background: 'transparent', color: '#71717a' };
 
+    const selectedTask = this.tasks.find(t => t.id === s.selectedTaskId) || this.tasks[0];
+
+    const todoCnt = this.tasks.filter(t => t.status === 'todo').length;
+    const inProgressCnt = this.tasks.filter(t => t.status === 'in-progress').length;
+    const doneCnt = this.tasks.filter(t => t.status === 'done').length;
+
+    const tasksByProject = (name) => this.tasks.filter(t => t.project === name);
+
+    const projectCards = this.projects.map(p => {
+      const pts = tasksByProject(p.name);
+      const done = pts.filter(t => t.status === 'done').length;
+      const pct = pts.length ? Math.round(done / pts.length * 100) + '%' : '0%';
+      const assignees = [...new Set(pts.map(t => t.av))].slice(0, 3);
+      const hex = p.color;
+      return {
+        ...p,
+        total: pts.length,
+        inProgress: pts.filter(t => t.status === 'in-progress').length,
+        done,
+        pct,
+        avatars: assignees,
+        colorBg: hex + '18',
+        onClick: () => this.setState({ view: 'tasks', projectFilter: p.name }),
+      };
+    });
+
+    const sidebarProjects = this.projects.map(p => ({
+      ...p,
+      count: tasksByProject(p.name).length,
+      sty: { display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 4px', borderRadius: '6px', cursor: 'pointer', transition: 'background 0.1s' },
+      onClick: () => this.setState({ view: 'tasks', projectFilter: p.name }),
+    }));
+
+    const colorSwatches = this.colorOptions.map(c => ({
+      color: c,
+      outline: c === s.newProjectColor ? '2px solid ' + c : '2px solid transparent',
+      onClick: () => this.setState({ newProjectColor: c }),
+    }));
+
     let filtered = this.tasks;
+    if (s.projectFilter) filtered = filtered.filter(t => t.project === s.projectFilter);
     if (s.statusFilter !== 'all') filtered = filtered.filter(t => t.status === s.statusFilter);
     if (s.searchQuery) {
       const q = s.searchQuery.toLowerCase();
       filtered = filtered.filter(t => t.title.toLowerCase().includes(q) || t.assignee.toLowerCase().includes(q));
     }
 
-    const selectedTask = this.tasks.find(t => t.id === s.selectedTaskId) || this.tasks[0];
-
-    const todoCnt = this.tasks.filter(t => t.status === 'todo').length;
-    const inProgressCnt = this.tasks.filter(t => t.status === 'in-progress').length;
-    const doneCnt = this.tasks.filter(t => t.status === 'done').length;
+    const tasksHeading = s.projectFilter ? s.projectFilter : 'Tasks';
+    const tasksSubheading = (s.projectFilter ? filtered.length : this.tasks.length) + ' tasks' + (s.projectFilter ? ' · ' + s.projectFilter : ' · Acme Inc.');
 
     return {
       isAuth: s.view === 'auth',
@@ -628,14 +772,24 @@ class Component extends DCLogic {
       isTasks: s.view === 'tasks',
       isTaskDetail: s.view === 'task-detail',
       isSettings: s.view === 'settings',
+      isProjects: s.view === 'projects',
       isSignIn: s.authMode === 'signin',
       isRegister: s.authMode === 'register',
       showNewTask: s.showNewTask,
+      showNewProject: s.showNewProject,
       inviteSuccess: s.inviteSuccess,
       isInviteForm: !s.inviteSuccess,
+      newProjectName: s.newProjectName,
+      colorSwatches,
+      projectCards,
+      sidebarProjects,
+      projectsCnt: this.projects.length,
+      tasksHeading,
+      tasksSubheading,
 
       navDashSty: s.view === 'dashboard' ? navActive : navInactive,
       navTasksSty: (s.view === 'tasks' || s.view === 'task-detail') ? navActive : navInactive,
+      navProjectsSty: s.view === 'projects' ? navActive : navInactive,
       navSettingsSty: s.view === 'settings' ? navActive : navInactive,
 
       filterAllSty: s.statusFilter === 'all' ? fActive : fInactive,
@@ -646,7 +800,7 @@ class Component extends DCLogic {
       searchQuery: s.searchQuery,
       inviteEmail: s.inviteEmail,
       todoCnt, inProgressCnt, doneCnt,
-      totalCnt: this.tasks.length,
+      totalCnt: s.projectFilter ? filtered.length : this.tasks.length,
       memberCnt: this.members.length,
 
       activities: this.activities,
@@ -674,9 +828,19 @@ class Component extends DCLogic {
       signIn: () => this.setState({ view: 'dashboard' }),
       toggleAuthMode: () => this.setState(p => ({ authMode: p.authMode === 'signin' ? 'register' : 'signin' })),
       goToDashboard: () => this.setState({ view: 'dashboard' }),
-      goToTasks: () => this.setState({ view: 'tasks' }),
+      goToTasks: () => this.setState({ view: 'tasks', projectFilter: null }),
+      goToProjects: () => this.setState({ view: 'projects' }),
       goToSettings: () => this.setState({ view: 'settings' }),
       backToTasks: () => this.setState({ view: 'tasks' }),
+      openNewProject: () => this.setState({ showNewProject: true }),
+      closeNewProject: () => this.setState({ showNewProject: false }),
+      createProject: () => {
+        const name = this.state.newProjectName.trim();
+        if (!name) return;
+        this.projects = [...this.projects, { id: Date.now(), name, color: this.state.newProjectColor, description: '' }];
+        this.setState({ showNewProject: false, newProjectName: '', newProjectColor: '#6366f1' });
+      },
+      setNewProjectName: (e) => this.setState({ newProjectName: e.target.value }),
       openNewTask: () => this.setState({ showNewTask: true }),
       closeNewTask: () => this.setState({ showNewTask: false }),
       stopPropagation: (e) => e.stopPropagation(),

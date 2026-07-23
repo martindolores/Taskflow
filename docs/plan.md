@@ -115,15 +115,19 @@ Carried over unchanged from `docs/legacy/backend-plan.md` NH-B1.
 
 ### PR-M6 — Frontend: Projects, built responsive from the start ⬜
 
-Built directly against the responsive shell/list/detail/form from PR-M1–M4 — no separate mobile pass needed.
+Built directly against the responsive shell/list/detail/form from PR-M1–M4 — no separate mobile pass needed. The design bundle (`designs/project/Taskflow.dc.html`, updated 2026-07-23) upgraded Projects from a sidebar-only filter into a full top-level screen — this chunk's scope grew to match; it's no longer just "a switcher in the sidebar."
 
-- Project switcher in the sidebar (desktop) — color-coded dot + name, per the prototype. On mobile (PR-M1's bottom-nav/drawer), fold this into the drawer/hamburger menu rather than the bottom nav bar itself (no room for a 4th persistent item on phone width)
+- **Backend follow-up (small, do first in this chunk)**: PR-M5 shipped before the design added a `description` field to projects — `Project.cs`, the `AddProjects` migration, `CreateProjectRequest`, and `ProjectResponse` are all `{ name, color }`-only today (confirmed by reading the current code). Add: nullable `Description` (string?) on `Project.cs`; a new EF Core migration adding nullable `description varchar(280)` to `projects`; optional `Description` on `CreateProjectRequest`/`ProjectResponse`. `tasks.project_id` wiring needs no changes — already fully in place from PR-M5
+- **Projects nav destination**: `Projects` becomes a 4th top-level nav item (Dashboard/Tasks/Projects/Settings) — PR-M1 shipped a 3-item nav (Dashboard/Tasks/Settings) before this design update, so this chunk extends `AppShell.tsx`'s bottom-nav/drawer (whichever PR-M1 picked) to carry a 4th item rather than folding Projects into a drawer-only switcher
+- **New `ProjectsScreen.tsx`** (`client/src/features/projects/`): grid of project cards (desktop `repeat(3, 1fr)`, per the prototype). Each card shows the color swatch, name, description, task-count stats (total / in-progress / done), a progress bar (% of the project's tasks marked done), up to 3 assignee avatars, and click-through to Task List filtered by that project. Stats are computed client-side by filtering the already-fetched task list per project — no new backend stats endpoint needed, mirrors the prototype's `renderVals()` approach. Below `sm`/`md` the card grid stacks to a single column, same convention as PR-M2's task cards
+- **Sidebar Projects section** (existing per-org list in `AppShell.tsx`, desktop `md`+ only): gains a task-count badge per row and a "+" icon-button that opens the New Project modal directly (in addition to the Projects screen's own "New project" button). Clicking a sidebar project row filters Task List by that project — same behavior as clicking a project card. Below `md` there's no persistent sidebar to hold this list (per PR-M1) — mobile users reach the same thing via the Projects nav item's card grid, which already has its own "New project" button and click-through, so nothing further to build for mobile here
+- **New Project modal**: `Dialog` goes `fullScreen` below `sm`, same as `TaskFormModal.tsx` (PR-M4). Fields: name, optional description (needs the backend follow-up above), and a fixed 6-swatch color picker (`#6366f1 #22d3ee #f59e0b #22c55e #f43f5e #a78bfa`, per the prototype) rather than a free-form hex input
+- **Task List heading changes when project-filtered** (extends the existing filter-pill pattern): heading switches from "Tasks" to the project name, and the subheading shows the filtered count + project name instead of the org-wide total — mirrors the prototype's `tasksHeading`/`tasksSubheading` logic
 - Project select field in `TaskFormModal.tsx` (already stacks correctly below `sm` from PR-M4)
 - Project tag on Task List rows (PR-M2's card layout) and Task Detail header (PR-M3's stacked layout)
-- Filter Task List by project (extends the existing filter-pill pattern)
-- `TaskListItem`/`TaskDetail` TS interfaces in `client/src/api/tasksApi.ts` gain `projectId`
+- `Project`/`TaskListItem`/`TaskDetail` TS interfaces in `client/src/api/` gain `description` / `projectId` / `projectId` respectively
 
-**Depends on:** PR-M5 (backend), PR-M1, PR-M2, PR-M3, PR-M4
+**Depends on:** PR-M5, PR-M1, PR-M2, PR-M3, PR-M4
 
 ### PR-M7 — Responsive Dashboard ⬜
 
