@@ -22,6 +22,7 @@ import { LabeledField } from '@/components/LabeledField'
 import { RoleBadge } from '@/components/RoleBadge'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/useAuth'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import {
   useCreateInvitationMutation,
   useDeactivateMemberMutation,
@@ -62,6 +63,7 @@ const memberGridColumns = (isAdmin: boolean) =>
 export function OrganizationSettingsScreen() {
   const { user } = useAuth()
   const isAdmin = user?.role === 'Admin'
+  const isMobile = useIsMobile()
 
   const organizationQuery = useOrganizationQuery()
   const membersQuery = useMembersQuery()
@@ -178,14 +180,20 @@ export function OrganizationSettingsScreen() {
               component="form"
               noValidate
               onSubmit={(event) => void inviteForm.handleSubmit(onInvite)(event)}
-              sx={{ display: 'flex', gap: 1.25, alignItems: 'flex-end', flexWrap: 'wrap' }}
+              sx={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: 1.25,
+                alignItems: isMobile ? 'stretch' : 'flex-end',
+                flexWrap: 'wrap',
+              }}
             >
               {createInvitation.isError && (
                 <Alert severity="error" sx={{ width: '100%' }}>
                   {extractErrorMessage(createInvitation.error, 'Could not send the invitation')}
                 </Alert>
               )}
-              <Box sx={{ flex: 1, minWidth: 200 }}>
+              <Box sx={{ flex: isMobile ? 'unset' : 1, minWidth: isMobile ? 'auto' : 200 }}>
                 <LabeledField
                   label="Email address"
                   placeholder="colleague@company.com"
@@ -199,7 +207,12 @@ export function OrganizationSettingsScreen() {
                 control={inviteForm.control}
                 name="role"
                 render={({ field }) => (
-                  <LabeledField label="Role" select sx={{ width: 130 }} {...field}>
+                  <LabeledField
+                    label="Role"
+                    select
+                    sx={{ width: isMobile ? '100%' : 130 }}
+                    {...field}
+                  >
                     <MenuItem value="Member">Member</MenuItem>
                     <MenuItem value="Admin">Admin</MenuItem>
                   </LabeledField>
@@ -209,7 +222,14 @@ export function OrganizationSettingsScreen() {
                 type="submit"
                 variant="contained"
                 disabled={inviteForm.formState.isSubmitting}
-                sx={{ py: 1.25, px: 2.25, fontSize: 13.5, fontWeight: 500, whiteSpace: 'nowrap' }}
+                sx={{
+                  py: 1.25,
+                  px: 2.25,
+                  fontSize: 13.5,
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap',
+                  width: isMobile ? '100%' : 'auto',
+                }}
               >
                 Send invite
               </Button>
@@ -227,53 +247,155 @@ export function OrganizationSettingsScreen() {
         </Box>
 
         {membersQuery.isLoading ? (
-          Array.from({ length: 4 }).map((_, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: memberGridColumns(isAdmin),
-                padding: '12px 22px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
-                <Skeleton variant="circular" width={31} height={31} />
-                <Skeleton variant="text" width="60%" />
+          Array.from({ length: 4 }).map((_, index) =>
+            isMobile ? (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  padding: '14px 16px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                  <Skeleton variant="circular" width={31} height={31} />
+                  <Skeleton variant="text" width="50%" />
+                </Box>
+                <Skeleton variant="text" width="70%" />
+                <Skeleton variant="rounded" width={70} height={20} />
               </Box>
-              <Skeleton variant="text" width="70%" />
-              <Skeleton variant="text" width={80} />
-              <Skeleton variant="text" width={60} />
-            </Box>
-          ))
+            ) : (
+              <Box
+                key={index}
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: memberGridColumns(isAdmin),
+                  padding: '12px 22px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                  <Skeleton variant="circular" width={31} height={31} />
+                  <Skeleton variant="text" width="60%" />
+                </Box>
+                <Skeleton variant="text" width="70%" />
+                <Skeleton variant="text" width={80} />
+                <Skeleton variant="text" width={60} />
+              </Box>
+            ),
+          )
         ) : (
           <>
-            <Box
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: memberGridColumns(isAdmin),
-                padding: '9px 22px',
-                borderBottom: '1px solid rgba(255,255,255,0.055)',
-                bgcolor: 'rgba(255,255,255,0.018)',
-              }}
-            >
-              {['Name', 'Email', 'Role', 'Status'].map((label) => (
-                <Typography key={label} variant="overline" sx={{ fontSize: 11 }}>
-                  {label}
-                </Typography>
-              ))}
-              {isAdmin && (
-                <Typography variant="overline" sx={{ fontSize: 11 }}>
-                  Actions
-                </Typography>
-              )}
-            </Box>
+            {!isMobile && (
+              <Box
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: memberGridColumns(isAdmin),
+                  padding: '9px 22px',
+                  borderBottom: '1px solid rgba(255,255,255,0.055)',
+                  bgcolor: 'rgba(255,255,255,0.018)',
+                }}
+              >
+                {['Name', 'Email', 'Role', 'Status'].map((label) => (
+                  <Typography key={label} variant="overline" sx={{ fontSize: 11 }}>
+                    {label}
+                  </Typography>
+                ))}
+                {isAdmin && (
+                  <Typography variant="overline" sx={{ fontSize: 11 }}>
+                    Actions
+                  </Typography>
+                )}
+              </Box>
+            )}
 
             {members.map((member) => {
               const isSelf = member.id === user?.id
               const isDeactivated = member.status === 'Deactivated'
+              const canRemove = isAdmin && !isSelf && !isDeactivated
+
+              if (isMobile) {
+                return (
+                  <Box
+                    key={member.id}
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 1,
+                      padding: '14px 16px',
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      opacity: isDeactivated ? 0.55 : 1,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                      <UserAvatar name={`${member.firstName} ${member.lastName}`} />
+                      <Typography sx={{ fontSize: 14, fontWeight: 500 }}>
+                        {member.firstName} {member.lastName}
+                      </Typography>
+                    </Box>
+                    <Typography
+                      sx={{
+                        fontSize: 12.5,
+                        color: 'text.secondary',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {member.email}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 1,
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {isAdmin && !isSelf && !isDeactivated ? (
+                          <Select
+                            size="small"
+                            value={member.role}
+                            onChange={(event) =>
+                              void updateMemberRole
+                                .mutateAsync({
+                                  userId: member.id,
+                                  role: event.target.value as UserRole,
+                                })
+                                .catch(() => {})
+                            }
+                            sx={{ width: 110, fontSize: 13 }}
+                          >
+                            <MenuItem value="Member">Member</MenuItem>
+                            <MenuItem value="Admin">Admin</MenuItem>
+                          </Select>
+                        ) : (
+                          <RoleBadge role={member.role} />
+                        )}
+                        <Typography
+                          sx={{ fontSize: 12, fontWeight: 500, color: statusColors[member.status] }}
+                        >
+                          {member.status}
+                        </Typography>
+                      </Box>
+                      {canRemove && (
+                        <Button
+                          onClick={() => setMemberToRemove(member)}
+                          sx={{ fontSize: 12, color: 'error.main', minWidth: 0, p: 0 }}
+                        >
+                          Remove
+                        </Button>
+                      )}
+                    </Box>
+                  </Box>
+                )
+              }
+
               return (
                 <Box
                   key={member.id}
@@ -319,7 +441,7 @@ export function OrganizationSettingsScreen() {
                   </Typography>
                   {isAdmin && (
                     <Box>
-                      {!isSelf && !isDeactivated && (
+                      {canRemove && (
                         <Button
                           onClick={() => setMemberToRemove(member)}
                           sx={{ fontSize: 12, color: 'error.main', minWidth: 0, p: 0 }}
@@ -343,22 +465,38 @@ export function OrganizationSettingsScreen() {
           </Box>
 
           {invitationsQuery.isLoading ? (
-            Array.from({ length: 2 }).map((_, index) => (
-              <Box
-                key={index}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  padding: '12px 22px',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                }}
-              >
-                <Skeleton variant="text" width="40%" sx={{ flex: 1 }} />
-                <Skeleton variant="rounded" width={60} height={20} />
-                <Skeleton variant="text" width={110} />
-              </Box>
-            ))
+            Array.from({ length: 2 }).map((_, index) =>
+              isMobile ? (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    padding: '14px 16px',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <Skeleton variant="text" width="60%" />
+                  <Skeleton variant="rounded" width={60} height={20} />
+                </Box>
+              ) : (
+                <Box
+                  key={index}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    padding: '12px 22px',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <Skeleton variant="text" width="40%" sx={{ flex: 1 }} />
+                  <Skeleton variant="rounded" width={60} height={20} />
+                  <Skeleton variant="text" width={110} />
+                </Box>
+              ),
+            )
           ) : pendingInvitations.length === 0 ? (
             <Box sx={{ p: '22px' }}>
               <Typography variant="body2" sx={{ color: 'text.disabled' }}>
@@ -366,33 +504,89 @@ export function OrganizationSettingsScreen() {
               </Typography>
             </Box>
           ) : (
-            pendingInvitations.map((invitation) => (
-              <Box
-                key={invitation.id}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  padding: '12px 22px',
-                  borderBottom: '1px solid rgba(255,255,255,0.04)',
-                }}
-              >
-                <Typography sx={{ fontSize: 13.5, flex: 1 }}>{invitation.email}</Typography>
-                <RoleBadge role={invitation.role} />
-                <Typography sx={{ fontSize: 12, color: 'text.disabled', width: 110 }}>
-                  Expires {formatExpiry(invitation.expiresAt)}
-                </Typography>
-                <Button onClick={() => void copyInviteLink(invitation.token)} sx={{ fontSize: 12 }}>
-                  Copy link
-                </Button>
-                <Button
-                  onClick={() => void revokeInvitation.mutateAsync(invitation.id).catch(() => {})}
-                  sx={{ fontSize: 12, color: 'error.main' }}
+            pendingInvitations.map((invitation) =>
+              isMobile ? (
+                <Box
+                  key={invitation.id}
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    padding: '14px 16px',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  }}
                 >
-                  Revoke
-                </Button>
-              </Box>
-            ))
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: 1,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: 13.5,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {invitation.email}
+                    </Typography>
+                    <RoleBadge role={invitation.role} />
+                  </Box>
+                  <Typography sx={{ fontSize: 12, color: 'text.disabled' }}>
+                    Expires {formatExpiry(invitation.expiresAt)}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1.5 }}>
+                    <Button
+                      onClick={() => void copyInviteLink(invitation.token)}
+                      sx={{ fontSize: 12, minWidth: 0, p: 0 }}
+                    >
+                      Copy link
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        void revokeInvitation.mutateAsync(invitation.id).catch(() => {})
+                      }
+                      sx={{ fontSize: 12, color: 'error.main', minWidth: 0, p: 0 }}
+                    >
+                      Revoke
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Box
+                  key={invitation.id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    padding: '12px 22px',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13.5, flex: 1 }}>{invitation.email}</Typography>
+                  <RoleBadge role={invitation.role} />
+                  <Typography sx={{ fontSize: 12, color: 'text.disabled', width: 110 }}>
+                    Expires {formatExpiry(invitation.expiresAt)}
+                  </Typography>
+                  <Button
+                    onClick={() => void copyInviteLink(invitation.token)}
+                    sx={{ fontSize: 12 }}
+                  >
+                    Copy link
+                  </Button>
+                  <Button
+                    onClick={() => void revokeInvitation.mutateAsync(invitation.id).catch(() => {})}
+                    sx={{ fontSize: 12, color: 'error.main' }}
+                  >
+                    Revoke
+                  </Button>
+                </Box>
+              ),
+            )
           )}
         </Paper>
       )}
