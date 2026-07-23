@@ -13,7 +13,12 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    // Re-runs just the specs tagged @mobile — the flows that touch the reworked
+    // responsive screens (List, Detail, Settings, Task form) — at a phone viewport.
+    { name: 'mobile', use: { ...devices['Pixel 5'] }, grep: /@mobile/ },
+  ],
   // Skipped when PLAYWRIGHT_BASE_URL points at an already-running build (e.g. a Vercel preview) —
   // otherwise this serves the local production build (`npm run build` first) on PORT.
   webServer: process.env.PLAYWRIGHT_BASE_URL

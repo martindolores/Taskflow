@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "test:contracts": "playwright test",
+    "test:contracts": "playwright test --project=chromium",
+    "test:contracts:mobile": "playwright test --project=mobile",
     "test:contracts:ui": "playwright test --ui"
   },
   "dependencies": {

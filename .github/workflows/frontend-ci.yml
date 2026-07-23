@@ -51,6 +51,10 @@ jobs:
         working-directory: client
         run: npm run test:contracts
 
+      - name: Run mobile viewport contract tests
+        working-directory: client
+        run: npm run test:contracts:mobile
+
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
