@@ -13,6 +13,7 @@ import { StatusChip } from '@/components/StatusChip'
 import { UserAvatar } from '@/components/UserAvatar'
 import { useAuth } from '@/features/auth/useAuth'
 import { useMembersQuery } from '@/features/organization/organizationQueries'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import { TaskFormModal } from './TaskFormModal'
 import { useTasksQuery } from './tasksQueries'
 
@@ -44,6 +45,7 @@ function formatDueDate(dueDate: string | null): string {
 export function TaskListScreen() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const isMobile = useIsMobile()
   const [searchParams] = useSearchParams()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<'all' | TaskStatus>(() =>
@@ -106,6 +108,9 @@ export function TaskListScreen() {
             borderRadius: '8px',
             padding: '3px',
             gap: '2px',
+            overflowX: 'auto',
+            flexShrink: 0,
+            maxWidth: '100%',
           }}
         >
           {filters.map((filter) => (
@@ -119,6 +124,7 @@ export function TaskListScreen() {
                 fontSize: 12.5,
                 fontWeight: 500,
                 minWidth: 0,
+                whiteSpace: 'nowrap',
                 color: statusFilter === filter.value ? 'nav.activeText' : 'text.disabled',
                 bgcolor: statusFilter === filter.value ? 'rgba(99, 102, 241, 0.12)' : 'transparent',
               }}
@@ -132,47 +138,66 @@ export function TaskListScreen() {
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search tasks…"
           size="small"
-          sx={{ flex: 1, minWidth: 180, maxWidth: 260 }}
+          sx={{ flex: 1, minWidth: 180, maxWidth: isMobile ? 'none' : 260 }}
         />
       </Box>
 
       <Paper sx={{ borderRadius: '11px', overflow: 'hidden' }}>
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: gridColumns,
-            padding: '10px 18px',
-            borderBottom: '1px solid rgba(255,255,255,0.06)',
-            bgcolor: 'rgba(255,255,255,0.018)',
-          }}
-        >
-          {['Title', 'Assignee', 'Status', 'Priority', 'Due'].map((label) => (
-            <Typography key={label} variant="overline" sx={{ fontSize: 11 }}>
-              {label}
-            </Typography>
-          ))}
-        </Box>
+        {!isMobile && (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: gridColumns,
+              padding: '10px 18px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              bgcolor: 'rgba(255,255,255,0.018)',
+            }}
+          >
+            {['Title', 'Assignee', 'Status', 'Priority', 'Due'].map((label) => (
+              <Typography key={label} variant="overline" sx={{ fontSize: 11 }}>
+                {label}
+              </Typography>
+            ))}
+          </Box>
+        )}
 
         {tasksQuery.isLoading ? (
-          Array.from({ length: 6 }).map((_, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: gridColumns,
-                padding: '13px 18px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <Skeleton variant="text" width="70%" />
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="rounded" width={64} height={22} />
-              <Skeleton variant="text" width="50%" />
-              <Skeleton variant="text" width="60%" />
-            </Box>
-          ))
+          Array.from({ length: 6 }).map((_, index) =>
+            isMobile ? (
+              <Box
+                key={index}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  padding: '14px 16px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                }}
+              >
+                <Skeleton variant="text" width="70%" />
+                <Skeleton variant="rounded" width={64} height={22} />
+                <Skeleton variant="text" width="50%" />
+              </Box>
+            ) : (
+              <Box
+                key={index}
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: gridColumns,
+                  padding: '13px 18px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <Skeleton variant="text" width="70%" />
+                <Skeleton variant="text" width="60%" />
+                <Skeleton variant="rounded" width={64} height={22} />
+                <Skeleton variant="text" width="50%" />
+                <Skeleton variant="text" width="60%" />
+              </Box>
+            ),
+          )
         ) : filteredItems.length === 0 ? (
           <Box sx={{ p: '22px' }}>
             <Typography variant="body2" sx={{ color: 'text.disabled' }}>
@@ -182,73 +207,165 @@ export function TaskListScreen() {
             </Typography>
           </Box>
         ) : (
-          filteredItems.map((task) => (
-            <Box
-              key={task.id}
-              onClick={() => navigate(`/tasks/${task.id}`)}
-              sx={{
-                display: 'grid',
-                gridTemplateColumns: gridColumns,
-                padding: '13px 18px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
-                alignItems: 'center',
-                cursor: 'pointer',
-                '&:hover': { bgcolor: 'rgba(255,255,255,0.025)' },
-              }}
-            >
-              <Typography
+          filteredItems.map((task) =>
+            isMobile ? (
+              <Box
+                key={task.id}
+                onClick={() => navigate(`/tasks/${task.id}`)}
                 sx={{
-                  fontSize: 13.5,
-                  fontWeight: 500,
-                  color: 'text.primary',
-                  pr: 2.25,
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 1,
+                  padding: '14px 16px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.025)' },
                 }}
               >
-                {task.title}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {task.assigneeName ? (
-                  <>
-                    <UserAvatar name={task.assigneeName} size={22} />
-                    <Typography
-                      sx={{
-                        fontSize: 12.5,
-                        color: 'text.secondary',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
-                    >
-                      {task.assigneeName}
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography sx={{ fontSize: 12.5, color: 'text.disabled' }}>
-                    Unassigned
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {task.title}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <StatusChip status={task.status} />
+                  <PriorityLabel priority={task.priority} />
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 1,
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
+                    {task.assigneeName ? (
+                      <>
+                        <UserAvatar name={task.assigneeName} size={22} />
+                        <Typography
+                          sx={{
+                            fontSize: 12.5,
+                            color: 'text.secondary',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {task.assigneeName}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography sx={{ fontSize: 12.5, color: 'text.disabled' }}>
+                        Unassigned
+                      </Typography>
+                    )}
+                  </Box>
+                  <Typography sx={{ fontSize: 12, color: 'text.disabled', whiteSpace: 'nowrap' }}>
+                    {formatDueDate(task.dueDate)}
                   </Typography>
-                )}
+                </Box>
               </Box>
-              <StatusChip status={task.status} />
-              <PriorityLabel priority={task.priority} />
-              <Typography sx={{ fontSize: 12.5, color: 'text.disabled' }}>
-                {formatDueDate(task.dueDate)}
-              </Typography>
-            </Box>
-          ))
+            ) : (
+              <Box
+                key={task.id}
+                onClick={() => navigate(`/tasks/${task.id}`)}
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: gridColumns,
+                  padding: '13px 18px',
+                  borderBottom: '1px solid rgba(255,255,255,0.04)',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.025)' },
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: 13.5,
+                    fontWeight: 500,
+                    color: 'text.primary',
+                    pr: 2.25,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {task.title}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {task.assigneeName ? (
+                    <>
+                      <UserAvatar name={task.assigneeName} size={22} />
+                      <Typography
+                        sx={{
+                          fontSize: 12.5,
+                          color: 'text.secondary',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {task.assigneeName}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography sx={{ fontSize: 12.5, color: 'text.disabled' }}>
+                      Unassigned
+                    </Typography>
+                  )}
+                </Box>
+                <StatusChip status={task.status} />
+                <PriorityLabel priority={task.priority} />
+                <Typography sx={{ fontSize: 12.5, color: 'text.disabled' }}>
+                  {formatDueDate(task.dueDate)}
+                </Typography>
+              </Box>
+            ),
+          )
         )}
       </Paper>
 
       {pageCount > 1 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={(_, value) => setPage(value)}
-            shape="rounded"
-          />
+        <Box
+          sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1.5, mt: 3 }}
+        >
+          {isMobile ? (
+            <>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={page <= 1}
+                onClick={() => setPage((current) => current - 1)}
+              >
+                Prev
+              </Button>
+              <Typography sx={{ fontSize: 13, color: 'text.disabled' }}>
+                Page {page} of {pageCount}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                disabled={page >= pageCount}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                Next
+              </Button>
+            </>
+          ) : (
+            <Pagination
+              count={pageCount}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              shape="rounded"
+            />
+          )}
         </Box>
       )}
 
