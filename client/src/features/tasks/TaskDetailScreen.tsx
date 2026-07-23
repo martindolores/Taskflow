@@ -17,12 +17,15 @@ import Skeleton from '@mui/material/Skeleton'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { extractErrorMessage } from '@/api/errors'
+import { ActivityFeed } from '@/components/ActivityFeed'
 import { PriorityLabel } from '@/components/PriorityLabel'
 import { StatusChip } from '@/components/StatusChip'
 import { UserAvatar } from '@/components/UserAvatar'
+import { useActivityQuery } from '@/features/activity/activityQueries'
 import { useAuth } from '@/features/auth/useAuth'
 import { useMembersQuery } from '@/features/organization/organizationQueries'
 import { useProjectsQuery } from '@/features/projects/projectsQueries'
+import { formatRelativeTime } from '@/utils/relativeTime'
 import {
   useCreateCommentMutation,
   useCommentsQuery,
@@ -32,28 +35,13 @@ import { TaskFormModal } from './TaskFormModal'
 import { commentFormSchema, type CommentFormValues } from './taskSchemas'
 import { useDeleteTaskMutation, useTaskQuery } from './tasksQueries'
 
+const TASK_HISTORY_LOOKBACK = 50
+
 function formatDueDate(dueDate: string | null): string {
   if (!dueDate) {
     return 'No due date'
   }
   return new Date(dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-function formatRelativeTime(isoDate: string): string {
-  const diffMs = Date.now() - new Date(isoDate).getTime()
-  const diffMinutes = Math.round(diffMs / 60_000)
-  if (diffMinutes < 1) {
-    return 'just now'
-  }
-  if (diffMinutes < 60) {
-    return `${diffMinutes}m ago`
-  }
-  const diffHours = Math.round(diffMinutes / 60)
-  if (diffHours < 24) {
-    return `${diffHours}h ago`
-  }
-  const diffDays = Math.round(diffHours / 24)
-  return `${diffDays}d ago`
 }
 
 export function TaskDetailScreen() {
@@ -69,6 +57,7 @@ export function TaskDetailScreen() {
   const membersQuery = useMembersQuery()
   const projectsQuery = useProjectsQuery()
   const commentsQuery = useCommentsQuery(taskId)
+  const activityQuery = useActivityQuery(TASK_HISTORY_LOOKBACK)
 
   const createComment = useCreateCommentMutation(taskId)
   const deleteComment = useDeleteCommentMutation(taskId)
@@ -137,6 +126,7 @@ export function TaskDetailScreen() {
   const assignee = members.find((member) => member.id === task.assigneeId)
   const project = projectsQuery.data?.find((item) => item.id === task.projectId)
   const comments = commentsQuery.data ?? []
+  const taskActivity = (activityQuery.data ?? []).filter((item) => item.taskId === task.id)
   const canDeleteTask = isAdmin || task.createdById === user?.id
 
   const metadataPanel = (
@@ -196,6 +186,17 @@ export function TaskDetailScreen() {
         <Typography sx={{ fontSize: 13, color: project ? 'text.secondary' : 'text.disabled' }}>
           {project ? project.name : 'No project'}
         </Typography>
+      </Box>
+
+      <Box sx={{ borderTop: '1px solid rgba(255,255,255,0.055)', pt: 2.25 }}>
+        <Typography variant="overline" sx={{ display: 'block', mb: 1.5 }}>
+          History
+        </Typography>
+        <ActivityFeed
+          items={taskActivity}
+          isLoading={activityQuery.isLoading}
+          emptyMessage="No activity yet."
+        />
       </Box>
 
       <Box

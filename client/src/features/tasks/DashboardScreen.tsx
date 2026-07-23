@@ -5,11 +5,14 @@ import Paper from '@mui/material/Paper'
 import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
 import type { TaskListItem, TaskStatus } from '@/api/tasksApi'
+import { ActivityFeed } from '@/components/ActivityFeed'
 import { StatusChip } from '@/components/StatusChip'
+import { useActivityQuery } from '@/features/activity/activityQueries'
 import { useAuth } from '@/features/auth/useAuth'
 import { useTasksQuery } from './tasksQueries'
 
 const OPEN_TASKS_LIMIT = 5
+const RECENT_ACTIVITY_LIMIT = 5
 
 const statCards: { label: string; status: TaskStatus; caption: string; color?: string }[] = [
   { label: 'To Do', status: 'ToDo', caption: 'tasks pending' },
@@ -51,6 +54,7 @@ export function DashboardScreen() {
   const todoQuery = useTasksQuery({ page: 1, pageSize: 100, status: 'ToDo' })
   const inProgressQuery = useTasksQuery({ page: 1, pageSize: 100, status: 'InProgress' })
   const doneQuery = useTasksQuery({ page: 1, pageSize: 1, status: 'Done' })
+  const activityQuery = useActivityQuery(RECENT_ACTIVITY_LIMIT)
 
   const isLoading = todoQuery.isLoading || inProgressQuery.isLoading || doneQuery.isLoading
 
@@ -125,72 +129,92 @@ export function DashboardScreen() {
         ))}
       </Box>
 
-      <Paper sx={{ borderRadius: '11px', p: '22px' }}>
-        <Box
-          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.25 }}
-        >
-          <Typography variant="subtitle1">Open tasks</Typography>
-          <Typography
-            onClick={() => navigate('/tasks')}
-            sx={{ fontSize: 12, color: 'primary.light', cursor: 'pointer' }}
-          >
-            View all →
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1.05fr' },
+          gap: 2,
+        }}
+      >
+        <Paper sx={{ borderRadius: '11px', p: '22px' }}>
+          <Typography variant="subtitle1" sx={{ mb: 2.25 }}>
+            Recent activity
           </Typography>
-        </Box>
+          <ActivityFeed items={activityQuery.data ?? []} isLoading={activityQuery.isLoading} />
+        </Paper>
 
-        {isLoading ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} variant="rounded" height={44} />
-            ))}
+        <Paper sx={{ borderRadius: '11px', p: '22px' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2.25,
+            }}
+          >
+            <Typography variant="subtitle1">Open tasks</Typography>
+            <Typography
+              onClick={() => navigate('/tasks')}
+              sx={{ fontSize: 12, color: 'primary.light', cursor: 'pointer' }}
+            >
+              View all →
+            </Typography>
           </Box>
-        ) : openTasks.length === 0 ? (
-          <Typography variant="body2" sx={{ color: 'text.disabled' }}>
-            No open tasks — nice work.
-          </Typography>
-        ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
-            {openTasks.map((task) => (
-              <Box
-                key={task.id}
-                onClick={() => navigate(`/tasks/${task.id}`)}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.25,
-                  padding: { xs: '11px 12px', sm: '9px 10px' },
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  cursor: 'pointer',
-                  bgcolor: 'rgba(255,255,255,0.015)',
-                  '&:hover': {
-                    bgcolor: 'rgba(255,255,255,0.04)',
-                    borderColor: 'rgba(255,255,255,0.09)',
-                  },
-                }}
-              >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontSize: 13,
-                      fontWeight: 500,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {task.title}
-                  </Typography>
-                  <Typography sx={{ fontSize: 11.5, color: 'text.disabled', mt: 0.125 }}>
-                    {formatDueDate(task.dueDate)}
-                  </Typography>
+
+          {isLoading ? (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Skeleton key={index} variant="rounded" height={44} />
+              ))}
+            </Box>
+          ) : openTasks.length === 0 ? (
+            <Typography variant="body2" sx={{ color: 'text.disabled' }}>
+              No open tasks — nice work.
+            </Typography>
+          ) : (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.875 }}>
+              {openTasks.map((task) => (
+                <Box
+                  key={task.id}
+                  onClick={() => navigate(`/tasks/${task.id}`)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.25,
+                    padding: { xs: '11px 12px', sm: '9px 10px' },
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    cursor: 'pointer',
+                    bgcolor: 'rgba(255,255,255,0.015)',
+                    '&:hover': {
+                      bgcolor: 'rgba(255,255,255,0.04)',
+                      borderColor: 'rgba(255,255,255,0.09)',
+                    },
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        fontSize: 13,
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {task.title}
+                    </Typography>
+                    <Typography sx={{ fontSize: 11.5, color: 'text.disabled', mt: 0.125 }}>
+                      {formatDueDate(task.dueDate)}
+                    </Typography>
+                  </Box>
+                  <StatusChip status={task.status} />
                 </Box>
-                <StatusChip status={task.status} />
-              </Box>
-            ))}
-          </Box>
-        )}
-      </Paper>
+              ))}
+            </Box>
+          )}
+        </Paper>
+      </Box>
     </Box>
   )
 }
