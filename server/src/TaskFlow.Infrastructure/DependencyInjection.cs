@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TaskFlow.Application.Activity;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Common;
 using TaskFlow.Application.Organizations;
@@ -8,6 +9,7 @@ using TaskFlow.Application.Projects;
 using TaskFlow.Application.TaskComments;
 using TaskFlow.Application.Tasks;
 using TaskFlow.Application.Users;
+using TaskFlow.Infrastructure.Activity;
 using TaskFlow.Infrastructure.Auth;
 using TaskFlow.Infrastructure.Organizations;
 using TaskFlow.Infrastructure.Persistence;
@@ -38,6 +40,7 @@ public static class DependencyInjection
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<ITaskCommentService, TaskCommentService>();
         services.AddScoped<IProjectService, ProjectService>();
+        services.AddScoped<IActivityService, ActivityService>();
 
         return services;
     }

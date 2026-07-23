@@ -80,6 +80,16 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         };
 
         db.Tasks.Add(task);
+        db.ActivityLog.Add(new ActivityLogEntry
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = task.OrganizationId,
+            ActorId = currentUserService.UserId!.Value,
+            TaskId = task.Id,
+            Type = ActivityType.TaskCreated,
+            Summary = $"created task \"{task.Title}\"",
+        });
+
         await db.SaveChangesAsync(cancellationToken);
 
         return new CreateTaskResponse(task.Id, task.Title, task.Description, task.Status, task.Priority, task.AssigneeId, task.DueDate, task.ProjectId, task.CreatedAt);
@@ -91,6 +101,9 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         await EnsureValidAssigneeAsync(request.AssigneeId, cancellationToken);
         await EnsureValidProjectAsync(request.ProjectId, cancellationToken);
 
+        var previousStatus = task.Status;
+        var previousAssigneeId = task.AssigneeId;
+
         task.Title = request.Title;
         task.Description = request.Description;
         task.Status = request.Status;
@@ -100,6 +113,17 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         task.ProjectId = request.ProjectId;
         task.UpdatedAt = DateTime.UtcNow;
 
+        if (task.Status != previousStatus)
+        {
+            AddActivityLogEntry(task, ActivityType.TaskStatusChanged, $"moved \"{task.Title}\" to {FormatStatus(task.Status)}");
+        }
+
+        if (task.AssigneeId.HasValue && task.AssigneeId != previousAssigneeId)
+        {
+            var assignee = await db.Users.SingleAsync(u => u.Id == task.AssigneeId.Value, cancellationToken);
+            AddActivityLogEntry(task, ActivityType.TaskAssigned, $"assigned \"{task.Title}\" to {assignee.FirstName} {assignee.LastName}");
+        }
+
         await db.SaveChangesAsync(cancellationToken);
 
         return ToTaskResponse(task);
@@ -108,6 +132,11 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
     public async Task<TaskStatusResponse> UpdateTaskStatusAsync(Guid taskId, UpdateTaskStatusRequest request, CancellationToken cancellationToken)
     {
         var task = await FindTaskAsync(taskId, cancellationToken);
+
+        if (task.Status != request.Status)
+        {
+            AddActivityLogEntry(task, ActivityType.TaskStatusChanged, $"moved \"{task.Title}\" to {FormatStatus(request.Status)}");
+        }
 
         task.Status = request.Status;
         task.UpdatedAt = DateTime.UtcNow;
@@ -166,6 +195,25 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
             throw new InvalidProjectException(projectId.Value);
         }
     }
+
+    private void AddActivityLogEntry(TaskItem task, ActivityType type, string summary) =>
+        db.ActivityLog.Add(new ActivityLogEntry
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = task.OrganizationId,
+            ActorId = currentUserService.UserId!.Value,
+            TaskId = task.Id,
+            Type = type,
+            Summary = summary,
+        });
+
+    private static string FormatStatus(TaskItemStatus status) => status switch
+    {
+        TaskItemStatus.ToDo => "To Do",
+        TaskItemStatus.InProgress => "In Progress",
+        TaskItemStatus.Done => "Done",
+        _ => status.ToString(),
+    };
 
     private static TaskResponse ToTaskResponse(TaskItem task) => new(
         task.Id,

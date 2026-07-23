@@ -115,6 +115,7 @@ app.MapOrganizationEndpoints();
 app.MapTaskEndpoints();
 app.MapTaskCommentEndpoints();
 app.MapProjectEndpoints();
+app.MapActivityEndpoints();
 
 app.Run();
 

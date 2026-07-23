@@ -38,6 +38,16 @@ public sealed class TaskCommentService(AppDbContext db, ICurrentUserService curr
         };
 
         db.TaskComments.Add(comment);
+        db.ActivityLog.Add(new ActivityLogEntry
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = task.OrganizationId,
+            ActorId = author.Id,
+            TaskId = task.Id,
+            Type = ActivityType.CommentAdded,
+            Summary = $"commented on \"{task.Title}\"",
+        });
+
         await db.SaveChangesAsync(cancellationToken);
 
         return new CommentResponse(comment.Id, comment.Body, author.Id, $"{author.FirstName} {author.LastName}", comment.CreatedAt);

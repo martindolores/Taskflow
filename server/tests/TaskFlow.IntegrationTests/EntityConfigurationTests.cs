@@ -224,6 +224,66 @@ public class InvitationConfigurationTests(WebApplicationFactory<Program> factory
     }
 }
 
+public class ActivityLogEntryConfigurationTests(WebApplicationFactory<Program> factory) : ModelTestBase(factory)
+{
+    [Fact]
+    public void ActivityLogEntry_MapsToActivityLogTable()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+
+        Assert.Equal("activity_log", entityType.GetTableName());
+    }
+
+    [Fact]
+    public void ActivityLogEntry_TypeIsStoredAsString()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+        var property = entityType.FindProperty(nameof(ActivityLogEntry.Type))!;
+
+        Assert.Equal(typeof(string), property.GetProviderClrType());
+    }
+
+    [Fact]
+    public void ActivityLogEntry_TaskIdIsNullable()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+        var property = entityType.FindProperty(nameof(ActivityLogEntry.TaskId))!;
+
+        Assert.True(property.IsNullable);
+    }
+
+    [Fact]
+    public void ActivityLogEntry_OrganizationIdIsIndexed()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+
+        var foreignKey = entityType.GetForeignKeys().Single(fk => fk.PrincipalEntityType.ClrType == typeof(Organization));
+
+        Assert.Contains(foreignKey.Properties, p => p.Name == nameof(ActivityLogEntry.OrganizationId));
+        Assert.Contains(entityType.GetIndexes(), i => i.Properties.SequenceEqual(foreignKey.Properties));
+    }
+
+    [Fact]
+    public void ActivityLogEntry_DeletingTaskSetsNull()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+
+        var foreignKey = entityType.GetForeignKeys().Single(fk => fk.PrincipalEntityType.ClrType == typeof(TaskItem));
+
+        Assert.Equal(DeleteBehavior.SetNull, foreignKey.DeleteBehavior);
+    }
+
+    [Fact]
+    public void ActivityLogEntry_DeletingActorIsRestricted()
+    {
+        var entityType = Model.FindEntityType(typeof(ActivityLogEntry))!;
+
+        var foreignKey = entityType.GetForeignKeys().Single(fk => fk.PrincipalEntityType.ClrType == typeof(User));
+
+        Assert.Equal(DeleteBehavior.Restrict, foreignKey.DeleteBehavior);
+    }
+}
+
 public class RefreshTokenConfigurationTests(WebApplicationFactory<Program> factory) : ModelTestBase(factory)
 {
     [Fact]

@@ -20,6 +20,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
 
     public DbSet<Project> Projects => Set<Project>();
 
+    public DbSet<ActivityLogEntry> ActivityLog => Set<ActivityLogEntry>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
@@ -29,5 +31,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
         modelBuilder.Entity<TaskComment>().HasQueryFilter(c => c.OrganizationId == currentTenantService.OrganizationId);
         modelBuilder.Entity<Invitation>().HasQueryFilter(i => i.OrganizationId == currentTenantService.OrganizationId);
         modelBuilder.Entity<Project>().HasQueryFilter(p => p.OrganizationId == currentTenantService.OrganizationId);
+        modelBuilder.Entity<ActivityLogEntry>().HasQueryFilter(a => a.OrganizationId == currentTenantService.OrganizationId);
     }
 }

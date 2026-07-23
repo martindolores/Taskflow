@@ -158,4 +158,23 @@ public class TenantIsolationTests(WebApplicationFactory<Program> factory) : ICla
         Assert.All(invitations, i => Assert.Equal(orgA.Id, i.OrganizationId));
         Assert.DoesNotContain(invitations, i => i.OrganizationId == orgB.Id);
     }
+
+    [Fact]
+    public async Task ActivityLog_QueryFilter_OnlyReturnsEntriesInCurrentTenant()
+    {
+        var orgA = await RegisterOrganizationWithClientAsync();
+        var orgB = await RegisterOrganizationWithClientAsync();
+
+        var createA = await orgA.Client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("Org A task", null, TaskPriority.Medium, null, null));
+        createA.EnsureSuccessStatusCode();
+        var createB = await orgB.Client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("Org B task", null, TaskPriority.Medium, null, null));
+        createB.EnsureSuccessStatusCode();
+
+        await using var db = CreateScopedDbContext(orgA.Id);
+        var entries = await db.ActivityLog.ToListAsync();
+
+        Assert.NotEmpty(entries);
+        Assert.All(entries, e => Assert.Equal(orgA.Id, e.OrganizationId));
+        Assert.DoesNotContain(entries, e => e.OrganizationId == orgB.Id);
+    }
 }

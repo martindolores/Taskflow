@@ -56,6 +56,16 @@ public sealed class OrganizationService(AppDbContext db, ICurrentUserService cur
         };
 
         db.Invitations.Add(invitation);
+        db.ActivityLog.Add(new ActivityLogEntry
+        {
+            Id = Guid.NewGuid(),
+            OrganizationId = invitation.OrganizationId,
+            ActorId = currentUserService.UserId!.Value,
+            TaskId = null,
+            Type = ActivityType.MemberInvited,
+            Summary = $"invited {email}",
+        });
+
         await db.SaveChangesAsync(cancellationToken);
 
         return ToInvitationResponse(invitation);
