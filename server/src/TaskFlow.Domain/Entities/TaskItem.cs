@@ -24,6 +24,10 @@ public class TaskItem
 
     public DateOnly? DueDate { get; set; }
 
+    public Guid? ProjectId { get; set; }
+
+    public Project? Project { get; set; }
+
     public Guid CreatedById { get; set; }
 
     public User? CreatedBy { get; set; }

@@ -10,4 +10,5 @@ public sealed record TaskListItemResponse(
     Guid? AssigneeId,
     string? AssigneeName,
     DateOnly? DueDate,
+    Guid? ProjectId,
     DateTime CreatedAt);

@@ -47,6 +47,7 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
                 t.AssigneeId,
                 t.Assignee == null ? null : t.Assignee.FirstName + " " + t.Assignee.LastName,
                 t.DueDate,
+                t.ProjectId,
                 t.CreatedAt))
             .ToListAsync(cancellationToken);
 
@@ -63,6 +64,7 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
     public async Task<CreateTaskResponse> CreateTaskAsync(CreateTaskRequest request, CancellationToken cancellationToken)
     {
         await EnsureValidAssigneeAsync(request.AssigneeId, cancellationToken);
+        await EnsureValidProjectAsync(request.ProjectId, cancellationToken);
 
         var task = new TaskItem
         {
@@ -73,19 +75,21 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
             Priority = request.Priority,
             AssigneeId = request.AssigneeId,
             DueDate = request.DueDate,
+            ProjectId = request.ProjectId,
             CreatedById = currentUserService.UserId!.Value,
         };
 
         db.Tasks.Add(task);
         await db.SaveChangesAsync(cancellationToken);
 
-        return new CreateTaskResponse(task.Id, task.Title, task.Description, task.Status, task.Priority, task.AssigneeId, task.DueDate, task.CreatedAt);
+        return new CreateTaskResponse(task.Id, task.Title, task.Description, task.Status, task.Priority, task.AssigneeId, task.DueDate, task.ProjectId, task.CreatedAt);
     }
 
     public async Task<TaskResponse> UpdateTaskAsync(Guid taskId, UpdateTaskRequest request, CancellationToken cancellationToken)
     {
         var task = await FindTaskAsync(taskId, cancellationToken);
         await EnsureValidAssigneeAsync(request.AssigneeId, cancellationToken);
+        await EnsureValidProjectAsync(request.ProjectId, cancellationToken);
 
         task.Title = request.Title;
         task.Description = request.Description;
@@ -93,6 +97,7 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         task.Priority = request.Priority;
         task.AssigneeId = request.AssigneeId;
         task.DueDate = request.DueDate;
+        task.ProjectId = request.ProjectId;
         task.UpdatedAt = DateTime.UtcNow;
 
         await db.SaveChangesAsync(cancellationToken);
@@ -147,6 +152,21 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         }
     }
 
+    private async Task EnsureValidProjectAsync(Guid? projectId, CancellationToken cancellationToken)
+    {
+        if (!projectId.HasValue)
+        {
+            return;
+        }
+
+        var projectExists = await db.Projects.AnyAsync(p => p.Id == projectId.Value, cancellationToken);
+
+        if (!projectExists)
+        {
+            throw new InvalidProjectException(projectId.Value);
+        }
+    }
+
     private static TaskResponse ToTaskResponse(TaskItem task) => new(
         task.Id,
         task.Title,
@@ -155,6 +175,7 @@ public sealed class TaskService(AppDbContext db, ICurrentUserService currentUser
         task.Priority,
         task.AssigneeId,
         task.DueDate,
+        task.ProjectId,
         task.CreatedById,
         task.CreatedAt,
         task.UpdatedAt);

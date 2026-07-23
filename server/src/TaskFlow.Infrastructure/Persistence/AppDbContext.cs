@@ -18,6 +18,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
 
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
+    public DbSet<Project> Projects => Set<Project>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
@@ -26,5 +28,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentTenant
         modelBuilder.Entity<TaskItem>().HasQueryFilter(t => t.OrganizationId == currentTenantService.OrganizationId);
         modelBuilder.Entity<TaskComment>().HasQueryFilter(c => c.OrganizationId == currentTenantService.OrganizationId);
         modelBuilder.Entity<Invitation>().HasQueryFilter(i => i.OrganizationId == currentTenantService.OrganizationId);
+        modelBuilder.Entity<Project>().HasQueryFilter(p => p.OrganizationId == currentTenantService.OrganizationId);
     }
 }

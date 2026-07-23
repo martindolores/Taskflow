@@ -7,4 +7,5 @@ public sealed record CreateTaskRequest(
     string? Description,
     TaskPriority Priority,
     Guid? AssigneeId,
-    DateOnly? DueDate);
+    DateOnly? DueDate,
+    Guid? ProjectId = null);

@@ -10,6 +10,7 @@ public sealed record TaskResponse(
     TaskPriority Priority,
     Guid? AssigneeId,
     DateOnly? DueDate,
+    Guid? ProjectId,
     Guid CreatedById,
     DateTime CreatedAt,
     DateTime UpdatedAt);

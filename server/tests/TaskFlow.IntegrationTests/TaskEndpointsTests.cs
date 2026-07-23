@@ -113,6 +113,33 @@ public class TaskEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     }
 
     [Fact]
+    public async Task CreateTask_WithProjectFromAnotherOrg_ReturnsBadRequest()
+    {
+        var admin = await RegisterAdminAsync();
+        var otherAdmin = await RegisterAdminAsync();
+        var otherProjectResponse = await otherAdmin.Client.PostAsJsonAsync("/api/projects", new TaskFlow.Application.Projects.Dtos.CreateProjectRequest("Marketing", "#FF5733"));
+        var otherProject = (await otherProjectResponse.Content.ReadFromJsonAsync<TaskFlow.Application.Projects.Dtos.ProjectResponse>(JsonOptions))!;
+
+        var response = await admin.Client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("Write docs", null, TaskPriority.Medium, null, null, otherProject.Id));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CreateTask_WithValidProject_ReturnsCreatedTaskWithProject()
+    {
+        var admin = await RegisterAdminAsync();
+        var projectResponse = await admin.Client.PostAsJsonAsync("/api/projects", new TaskFlow.Application.Projects.Dtos.CreateProjectRequest("Marketing", "#FF5733"));
+        var project = (await projectResponse.Content.ReadFromJsonAsync<TaskFlow.Application.Projects.Dtos.ProjectResponse>(JsonOptions))!;
+
+        var response = await admin.Client.PostAsJsonAsync("/api/tasks", new CreateTaskRequest("Write docs", null, TaskPriority.Medium, null, null, project.Id));
+
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<CreateTaskResponse>(JsonOptions);
+        Assert.Equal(project.Id, body!.ProjectId);
+    }
+
+    [Fact]
     public async Task GetTask_ReturnsTaskDetail()
     {
         var admin = await RegisterAdminAsync();

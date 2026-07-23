@@ -8,4 +8,5 @@ public sealed record UpdateTaskRequest(
     TaskItemStatus Status,
     TaskPriority Priority,
     Guid? AssigneeId,
-    DateOnly? DueDate);
+    DateOnly? DueDate,
+    Guid? ProjectId = null);
