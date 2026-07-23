@@ -83,7 +83,14 @@ export function DashboardScreen() {
         </Typography>
       </Box>
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 1.75, mb: 3.5 }}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+          gap: 1.75,
+          mb: 3.5,
+        }}
+      >
         {statCards.map((card) => (
           <Paper
             key={card.status}
@@ -151,7 +158,7 @@ export function DashboardScreen() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 1.25,
-                  padding: '9px 10px',
+                  padding: { xs: '11px 12px', sm: '9px 10px' },
                   borderRadius: '8px',
                   border: '1px solid rgba(255,255,255,0.05)',
                   cursor: 'pointer',
