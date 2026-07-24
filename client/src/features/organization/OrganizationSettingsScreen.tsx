@@ -111,7 +111,7 @@ export function OrganizationSettingsScreen() {
   const orgName = organizationQuery.data?.name ?? 'your organization'
 
   return (
-    <Box sx={{ p: '36px 40px', maxWidth: 820 }}>
+    <Box sx={{ p: '36px 40px' }}>
       <Box sx={{ mb: 4 }}>
         <Typography variant="h1">Organization settings</Typography>
         <Typography variant="body2" sx={{ color: 'text.disabled', mt: 0.5 }}>

@@ -50,7 +50,7 @@ export function ProjectsScreen() {
   const tasks = useMemo(() => tasksQuery.data?.items ?? [], [tasksQuery.data])
 
   return (
-    <Box sx={{ p: '36px 40px', maxWidth: 1040 }}>
+    <Box sx={{ p: '36px 40px' }}>
       <Box
         sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 3.5 }}
       >
@@ -69,11 +69,16 @@ export function ProjectsScreen() {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              xl: 'repeat(4, 1fr)',
+            },
             gap: 1.75,
           }}
         >
-          {Array.from({ length: 3 }).map((_, index) => (
+          {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} variant="rounded" height={220} sx={{ borderRadius: '11px' }} />
           ))}
         </Box>
@@ -87,7 +92,12 @@ export function ProjectsScreen() {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              xl: 'repeat(4, 1fr)',
+            },
             gap: 1.75,
           }}
         >

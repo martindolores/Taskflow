@@ -77,7 +77,7 @@ export function DashboardScreen() {
   })
 
   return (
-    <Box sx={{ p: '36px 40px', maxWidth: 1040 }}>
+    <Box sx={{ p: '36px 40px' }}>
       <Box sx={{ mb: 4.25 }}>
         <Typography variant="h1" sx={{ fontSize: 23, mb: 0.5 }}>
           {greeting()}, {user?.firstName}
