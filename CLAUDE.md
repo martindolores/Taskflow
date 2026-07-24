@@ -27,6 +27,7 @@ Taskflow is a multi-tenant task/project management app: an ASP.NET Core Web API 
 | Frontend build/lint/format commands & conventions | `client/CLAUDE.md` (§ Key files has the file map) |
 | Local Postgres for backend dev/tests | `server/docker-compose.yml` |
 | Agent-path shortcuts (build/run/query DB) | `server/.claude/skills/{run-taskflow-api,query-taskflow-db}/` |
+| `/deploy` skill — bump version, tag, push to trigger Render/Vercel deploy | `.claude/skills/deploy/SKILL.md` |
 
 ## Working conventions
 
