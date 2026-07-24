@@ -1,6 +1,6 @@
 # TaskFlow — Backend
 
-ASP.NET Core Web API for TaskFlow. See [`../docs/plan.md`](../docs/plan.md) for the current build plan, or [`../docs/legacy/backend-plan.md`](../docs/legacy/backend-plan.md) for the original (fully shipped) spec.
+ASP.NET Core Web API for TaskFlow. See [`../docs/legacy/backend-plan.md`](../docs/legacy/backend-plan.md) for the original (fully shipped) spec, or [`../docs/legacy/mobile-plan.md`](../docs/legacy/mobile-plan.md) for the mobile-responsive + Projects/Activity Log follow-up (also fully shipped).
 
 ## Solution layout
 
