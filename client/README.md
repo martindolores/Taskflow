@@ -1,6 +1,6 @@
 # Taskflow — Frontend
 
-React + TypeScript frontend for Taskflow, built with Vite and MUI. See [`../docs/frontend-plan.md`](../docs/frontend-plan.md) for the full technical spec and build plan.
+React + TypeScript frontend for Taskflow, built with Vite and MUI. See [`../docs/plan.md`](../docs/plan.md) for the current build plan, or [`../docs/legacy/frontend-plan.md`](../docs/legacy/frontend-plan.md) for the original (fully shipped) spec.
 
 ## Stack
 
@@ -13,8 +13,10 @@ src/
   api/            # axios instance, tokenStorage, per-resource API modules, query client
   components/     # shared/dumb components
   features/
+    activity/
     auth/
     organization/
+    projects/
     tasks/
   routes/         # route components, ProtectedRoute / PublicRoute
   theme/          # MUI theme (palette/typography/shape tokens)
@@ -51,5 +53,6 @@ npm run format              # prettier --write .
 npm run format:check         # prettier --check . (CI gate)
 npm run preview              # serve the production build locally
 npm run test:contracts       # Playwright request-contract tests (mocked backend, no server needed)
+npm run test:contracts:mobile # same, against a mobile viewport project
 npm run test:contracts:ui    # same, in Playwright's UI mode
 ```

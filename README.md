@@ -10,6 +10,8 @@ Each organization is an isolated tenant with its own users and tasks. Admins inv
 - Organization creation, member invitations, and role-based access (Admin / Member)
 - Task CRUD with status, priority, assignee, and due date
 - Threaded comments on tasks
+- Projects, with per-project task stats and progress
+- Activity log (dashboard feed + per-task history)
 - Dashboard with task/status overview
 - Enforced multi-tenant data isolation at the database query layer
 
@@ -65,14 +67,19 @@ cd server
 dotnet test           # unit + integration suites — requires the docker-compose Postgres to be running
 ```
 
-No frontend test runner is wired up yet.
+```bash
+cd client
+npm run build              # Playwright's preview server serves dist/
+npm run test:contracts     # Playwright request-contract tests, mocked backend
+```
 
 ## Project structure
 
 ```
 server/    ASP.NET Core Web API — see server/CLAUDE.md for architecture, commands, and conventions
 client/    React frontend — see client/CLAUDE.md for structure, commands, and conventions
-docs/      Backend and frontend technical specs (data model, endpoint contracts, build plan)
+docs/      plan.md is the current spec (build plan, in-progress work); legacy/ holds the original,
+           fully-shipped backend/frontend specs and the still-current deployment runbook
 designs/   Design handoff bundle (HTML/CSS/JS prototypes) — visual source of truth for screens
 ```
 

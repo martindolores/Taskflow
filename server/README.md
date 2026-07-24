@@ -1,6 +1,6 @@
 # TaskFlow — Backend
 
-ASP.NET Core Web API for TaskFlow. See [`../docs/backend-plan.md`](../docs/backend-plan.md) for the full technical spec and build plan.
+ASP.NET Core Web API for TaskFlow. See [`../docs/plan.md`](../docs/plan.md) for the current build plan, or [`../docs/legacy/backend-plan.md`](../docs/legacy/backend-plan.md) for the original (fully shipped) spec.
 
 ## Solution layout
 
