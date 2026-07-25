@@ -18,7 +18,7 @@ Taskflow tracks work on a GitHub Project board, not in `docs/` files (see root `
 2. **Draft each issue from the conversation**, not from a one-line paraphrase. Match the depth of the existing board issues (e.g. #17–21):
    - **Title** — short, imperative. If this task is the next chunk in an existing lettered sequence (grep open/closed issues for the prefix, e.g. `PR-E`), continue that numbering; otherwise use a plain descriptive title.
    - **Body** — include: the *why*/context if it came up in discussion, concrete implementation bullets (files, endpoints, behavior — whatever was actually decided, not generic filler), and anything explicitly called out as out of scope. Don't pad with boilerplate sections that have no real content.
-   - **Dependencies** — if this task depends on another one from the same batch (or an existing open issue), add a `**Depends on:** #<n>` line. Since issue numbers only exist after creation, create issues in dependency order (earliest prerequisite first) so each later issue can reference the real number of the one(s) it depends on.
+   - **Dependencies** — if this task depends on another one from the same batch (or an existing open issue), note that in the body prose (e.g. "builds on #<n>" once known), but record the actual dependency as a native GitHub issue relationship (step 6), not as a separate `**Depends on:**` line. Since issue numbers only exist after creation, create issues in dependency order (earliest prerequisite first) so later issues can reference and link to the real number of the one(s) they depend on.
 
 3. **Show the drafted title + body for every issue and confirm** before creating anything — this writes to a shared system (real GitHub issues), so a quick "does this look right?" beats creating something that immediately needs editing. Skip this only if the user has already dictated the exact title/body themselves.
 
@@ -33,7 +33,13 @@ Taskflow tracks work on a GitHub Project board, not in `docs/` files (see root `
    gh project item-add 1 --owner martindolores --url <issue-url>
    ```
 
-6. **Report back** the issue URL(s) and confirm they landed in Todo, noting the dependency chain if there was one.
+6. **Link dependencies using GitHub's native issue relationship** (not a text convention) — for each issue that depends on another from this batch (or an existing issue), mark it *blocked by* the prerequisite:
+   ```bash
+   gh issue edit <dependent-issue-number> --add-blocked-by <prerequisite-issue-number>
+   ```
+   This is the relationship visible in the issue sidebar/board (distinct from parent/sub-issue). Do this after both issues in the pair exist.
+
+7. **Report back** the issue URL(s) and confirm they landed in Todo, noting the dependency chain if there was one.
 
 ## Notes
 
