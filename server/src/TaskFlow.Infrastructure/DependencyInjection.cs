@@ -11,6 +11,7 @@ using TaskFlow.Application.Tasks;
 using TaskFlow.Application.Users;
 using TaskFlow.Infrastructure.Activity;
 using TaskFlow.Infrastructure.Auth;
+using TaskFlow.Infrastructure.Email;
 using TaskFlow.Infrastructure.Organizations;
 using TaskFlow.Infrastructure.Persistence;
 using TaskFlow.Infrastructure.Projects;
@@ -41,6 +42,21 @@ public static class DependencyInjection
         services.AddScoped<ITaskCommentService, TaskCommentService>();
         services.AddScoped<IProjectService, ProjectService>();
         services.AddScoped<IActivityService, ActivityService>();
+
+        services.Configure<EmailOptions>(options =>
+        {
+            configuration.GetSection("Email").Bind(options);
+            options.FrontendBaseUrl = configuration["Frontend:BaseUrl"] ?? string.Empty;
+        });
+
+        if (string.IsNullOrWhiteSpace(configuration["Email:Brevo:ApiKey"]))
+        {
+            services.AddSingleton<IEmailService, NullEmailService>();
+        }
+        else
+        {
+            services.AddHttpClient<IEmailService, BrevoEmailService>();
+        }
 
         return services;
     }
