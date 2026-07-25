@@ -27,6 +27,7 @@ Work tracking lives on the [GitHub Project board](https://github.com/users/marti
 | Local Postgres for backend dev/tests | `server/docker-compose.yml` |
 | Agent-path shortcuts (build/run/query DB) | `server/.claude/skills/{run-taskflow-api,query-taskflow-db}/` |
 | `/deploy` skill — bump version, tag, push to trigger Render/Vercel deploy | `.claude/skills/deploy/SKILL.md` |
+| `/write-task` skill — file a discussed task as an issue on the project board | `.claude/skills/write-task/SKILL.md` |
 
 ## Working conventions
 
