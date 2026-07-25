@@ -1,6 +1,6 @@
 # Taskflow — Frontend
 
-React + TypeScript frontend for Taskflow, built with Vite and MUI. See [`../docs/legacy/frontend-plan.md`](../docs/legacy/frontend-plan.md) for the original (fully shipped) spec, or [`../docs/legacy/mobile-plan.md`](../docs/legacy/mobile-plan.md) for the mobile-responsive + Projects/Activity Log follow-up (also fully shipped).
+React + TypeScript frontend for Taskflow, built with Vite and MUI.
 
 ## Stack
 

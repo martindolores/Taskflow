@@ -78,12 +78,10 @@ npm run test:contracts     # Playwright request-contract tests, mocked backend
 ```
 server/    ASP.NET Core Web API — see server/CLAUDE.md for architecture, commands, and conventions
 client/    React frontend — see client/CLAUDE.md for structure, commands, and conventions
-docs/      plan.md is the current spec (build plan, in-progress work); legacy/ holds the original,
-           fully-shipped backend/frontend specs and the still-current deployment runbook
 designs/   Design handoff bundle (HTML/CSS/JS prototypes) — visual source of truth for screens
 ```
 
-For a deeper dive into either half of the stack, read `server/CLAUDE.md` or `client/CLAUDE.md`.
+For a deeper dive into either half of the stack, read `server/CLAUDE.md` or `client/CLAUDE.md`. Deployment steps are in [`RUNBOOK.md`](./RUNBOOK.md). Active and historical work is tracked on the [project board](https://github.com/users/martindolores/projects/1), not in the repo.
 
 ## Troubleshooting
 

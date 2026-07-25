@@ -3,7 +3,7 @@ name: deploy
 description: Cut a tagged production release for Taskflow — bump the version, commit, tag, and push to trigger the Render/Vercel deploy pipeline. Use when the user asks to deploy, release, ship, or cut a new version.
 ---
 
-Taskflow deploys are triggered by pushing a `v*` git tag, not by merging to `main` (see `docs/legacy/deployment-plan.md` §7). `backend-ci.yml` and `frontend-ci.yml` each have a `deploy` job gated on `github.ref_type == 'tag'` plus `build-and-test`/`gitleaks` passing; one tag push deploys backend (Render) and frontend (Vercel) together.
+Taskflow deploys are triggered by pushing a `v*` git tag, not by merging to `main` (see `RUNBOOK.md` §7). `backend-ci.yml` and `frontend-ci.yml` each have a `deploy` job gated on `github.ref_type == 'tag'` plus `build-and-test`/`gitleaks` passing; one tag push deploys backend (Render) and frontend (Vercel) together.
 
 ## Steps
 
@@ -34,4 +34,4 @@ Taskflow deploys are triggered by pushing a `v*` git tag, not by merging to `mai
 ## Notes
 
 - Version format is bare semver with a `v` prefix (`v0.1.0`), matching the existing tag.
-- If `RENDER_DEPLOY_HOOK_URL` / `RENDER_HEALTH_URL` / `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets aren't set on the repo, the tag push still succeeds but the `deploy` jobs fail — that's one-time setup covered in `docs/legacy/deployment-plan.md` §3–4, not something this skill fixes.
+- If `RENDER_DEPLOY_HOOK_URL` / `RENDER_HEALTH_URL` / `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` secrets aren't set on the repo, the tag push still succeeds but the `deploy` jobs fail — that's one-time setup covered in `RUNBOOK.md` §3–4, not something this skill fixes.

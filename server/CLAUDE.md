@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-ASP.NET Core 8 (`net8.0`) Web API, Clean Architecture, PostgreSQL via EF Core (`Npgsql` + `EFCore.NamingConventions` for snake_case columns), JWT bearer auth, minimal APIs (no MVC controllers). Full spec, data model, and endpoint contracts: `../docs/backend-plan.md`.
+ASP.NET Core 8 (`net8.0`) Web API, Clean Architecture, PostgreSQL via EF Core (`Npgsql` + `EFCore.NamingConventions` for snake_case columns), JWT bearer auth, minimal APIs (no MVC controllers).
 
 ## Commands
 

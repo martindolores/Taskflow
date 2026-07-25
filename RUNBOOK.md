@@ -1,8 +1,8 @@
-# Taskflow — Deployment Plan
+# Taskflow — Deployment Runbook
 
 Free-tier deployment: Render (backend), Vercel (frontend), Neon (Postgres).
 
-Companion documents: [`backend-plan.md`](./backend-plan.md) §4 and [`frontend-plan.md`](./frontend-plan.md) §4 cover the Render/Vercel config each PR (PR-B11, PR-F12) added to the repo. This doc is the step-by-step runbook for standing that config up, plus the database choice those docs left open.
+This is the step-by-step runbook for standing up and operating the live deployment — not a build plan. Task tracking for active/upcoming work lives on the [project board](https://github.com/users/martindolores/projects/1), not here.
 
 ---
 

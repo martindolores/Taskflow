@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-Vite + React 19 + TypeScript, MUI v9 (Emotion) for components/theming, React Router for routing, TanStack Query for server state, React Hook Form + Zod for forms, a single Axios instance for HTTP. Full spec, design tokens, and PR build plan: `../docs/frontend-plan.md`. Visual source of truth for screens not yet built: `../designs/project/Taskflow.dc.html` (read `../designs/README.md` first).
+Vite + React 19 + TypeScript, MUI v9 (Emotion) for components/theming, React Router for routing, TanStack Query for server state, React Hook Form + Zod for forms, a single Axios instance for HTTP. Visual source of truth for screens not yet built: `../designs/project/Taskflow.dc.html` (read `../designs/README.md` first).
 
 ## Commands
 
@@ -82,5 +82,5 @@ tests/            # Playwright request-contract specs — mocked backend (rework
 - **New API calls**: add a per-resource module under `api/` (e.g. `tasksApi.ts`) that wraps `apiClient`, then consume it through a TanStack Query hook in the relevant `features/<name>/` folder — don't call `apiClient` directly from components.
 - **Env config**: only `VITE_API_URL` so far (documented in `.env.example`); copy it to `.env` for local dev (gitignored). New env vars must be prefixed `VITE_` to be exposed to client code, added to `.env.example`, and typed in `src/vite-env.d.ts`'s `ImportMetaEnv`.
 - **Linting/formatting**: oxlint (not ESLint — chosen over the spec's original ESLint pick for speed and zero-config; see `.oxlintrc.json`) plus Prettier for formatting. Both are separate steps (`npm run lint`, `npm run format:check`); oxlint does not format.
-- **MUI version**: the project runs MUI v9, not the v5 named in `docs/frontend-plan.md` §1 (the doc predates several MUI majors). The theming API used by the doc's design tokens (palette/typography/shape) is stable across that range; watch for v6+ breaking changes in individual components (e.g. `Grid`) when implementing new screens.
+- **MUI version**: the project runs MUI v9. Watch for v6+ breaking changes in individual components (e.g. `Grid`) when implementing new screens.
 - **New request-contract spec**: mock every endpoint the flow touches with `mockJson` (reads) and `captureRequest` (the one write endpoint under test) from `tests/support/api.ts` — there's no real backend, so an unmocked call just hangs. Use `signInWithFakeSession` from `tests/support/fixtures.ts` for specs that need an already-authenticated page. Assert the resolved `captureRequest` body with `toEqual` against an object literal that mirrors the backend's C# request DTO field-for-field (see the existing specs) — that's the actual point of the test, not just UI interaction. Locate elements the same way the app is built to be labeled — `getByLabel`/`getByRole`/`getByPlaceholder` — rather than adding `data-testid`s; every form field in this codebase already has a real `<label>` via `LabeledField` for exactly this reason.
