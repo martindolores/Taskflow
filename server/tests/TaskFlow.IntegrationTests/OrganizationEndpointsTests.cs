@@ -121,6 +121,7 @@ public class OrganizationEndpointsTests(WebApplicationFactory<Program> factory) 
         Assert.Equal(InvitationStatus.Pending, body.Status);
         Assert.False(string.IsNullOrEmpty(body.Token));
         Assert.Equal(await ReadTokenFromDbAsync(body.Id), body.Token);
+        Assert.True(body.EmailSent);
     }
 
     [Fact]

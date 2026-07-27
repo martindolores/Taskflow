@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TaskFlow.Application.Auth.Exceptions;
 using TaskFlow.Application.Common;
 using TaskFlow.Application.Organizations;
@@ -7,11 +8,16 @@ using TaskFlow.Application.Organizations.Dtos;
 using TaskFlow.Application.Organizations.Exceptions;
 using TaskFlow.Domain.Entities;
 using TaskFlow.Domain.Enums;
+using TaskFlow.Infrastructure.Email;
 using TaskFlow.Infrastructure.Persistence;
 
 namespace TaskFlow.Infrastructure.Organizations;
 
-public sealed class OrganizationService(AppDbContext db, ICurrentUserService currentUserService) : IOrganizationService
+public sealed class OrganizationService(
+    AppDbContext db,
+    ICurrentUserService currentUserService,
+    IEmailService emailService,
+    IOptions<EmailOptions> emailOptions) : IOrganizationService
 {
     public async Task<OrganizationResponse> GetOrganizationAsync(CancellationToken cancellationToken)
     {
@@ -68,13 +74,26 @@ public sealed class OrganizationService(AppDbContext db, ICurrentUserService cur
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return ToInvitationResponse(invitation);
+        var organization = await db.Organizations.SingleAsync(o => o.Id == invitation.OrganizationId, cancellationToken);
+        var inviter = await db.Users.SingleAsync(u => u.Id == invitation.InvitedById, cancellationToken);
+        var acceptUrl = $"{emailOptions.Value.FrontendBaseUrl}/accept-invitation?token={invitation.Token}";
+
+        var emailSent = await emailService.SendInvitationEmailAsync(
+            invitation.Email,
+            organization.Name,
+            $"{inviter.FirstName} {inviter.LastName}",
+            invitation.Role,
+            acceptUrl,
+            invitation.ExpiresAt,
+            cancellationToken);
+
+        return ToInvitationResponse(invitation, emailSent);
     }
 
     public async Task<IReadOnlyList<InvitationResponse>> GetInvitationsAsync(CancellationToken cancellationToken) =>
         await db.Invitations
             .OrderByDescending(i => i.CreatedAt)
-            .Select(i => new InvitationResponse(i.Id, i.Email, i.Role, i.Status, i.ExpiresAt, i.Token))
+            .Select(i => new InvitationResponse(i.Id, i.Email, i.Role, i.Status, i.ExpiresAt, i.Token, true))
             .ToListAsync(cancellationToken);
 
     public async Task RevokeInvitationAsync(Guid invitationId, CancellationToken cancellationToken)
@@ -121,6 +140,6 @@ public sealed class OrganizationService(AppDbContext db, ICurrentUserService cur
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    private static InvitationResponse ToInvitationResponse(Invitation invitation) =>
-        new(invitation.Id, invitation.Email, invitation.Role, invitation.Status, invitation.ExpiresAt, invitation.Token);
+    private static InvitationResponse ToInvitationResponse(Invitation invitation, bool emailSent) =>
+        new(invitation.Id, invitation.Email, invitation.Role, invitation.Status, invitation.ExpiresAt, invitation.Token, emailSent);
 }
