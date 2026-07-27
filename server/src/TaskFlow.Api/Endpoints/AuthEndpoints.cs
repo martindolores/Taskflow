@@ -15,7 +15,8 @@ public static class AuthEndpoints
                 var response = await authService.RegisterOrganizationAsync(request, cancellationToken);
                 return Results.Created($"/api/users/{response.UserId}", response);
             })
-            .AddEndpointFilter<ValidationFilter<RegisterRequest>>();
+            .AddEndpointFilter<ValidationFilter<RegisterRequest>>()
+            .RequireRateLimiting("register");
 
         group.MapPost("/login", async (LoginRequest request, IAuthService authService, CancellationToken cancellationToken) =>
             {

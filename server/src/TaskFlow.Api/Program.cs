@@ -1,13 +1,18 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using TaskFlow.Api.Endpoints;
 using TaskFlow.Api.Middleware;
+using TaskFlow.Api.RateLimiting;
 using TaskFlow.Api.Services;
 using TaskFlow.Application.Auth.Validators;
 using TaskFlow.Application.Common;
@@ -79,6 +84,40 @@ builder.Services.AddCors(options =>
         .AllowAnyMethod());
 });
 
+builder.Services.Configure<RegisterRateLimitOptions>(builder.Configuration.GetSection("RateLimiting:Register"));
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            context.HttpContext.Response.Headers.RetryAfter =
+                ((int)retryAfter.TotalSeconds).ToString(CultureInfo.InvariantCulture);
+        }
+
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { title = "Too many requests. Please try again later.", status = StatusCodes.Status429TooManyRequests },
+            cancellationToken);
+    };
+
+    options.AddPolicy("register", httpContext =>
+    {
+        var registerRateLimitOptions = httpContext.RequestServices
+            .GetRequiredService<IOptions<RegisterRateLimitOptions>>().Value;
+
+        return RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = registerRateLimitOptions.PermitLimit,
+                Window = TimeSpan.FromMinutes(registerRateLimitOptions.WindowMinutes),
+                QueueLimit = 0,
+            });
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsProduction() && app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
@@ -101,6 +140,7 @@ app.UseCors(CorsPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 var appVersion = typeof(Program).Assembly
     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
