@@ -2,7 +2,7 @@ namespace TaskFlow.Infrastructure.Email;
 
 public sealed class EmailOptions
 {
-    public BrevoOptions Brevo { get; init; } = new();
+    public SmtpOptions Smtp { get; init; } = new();
 
     public string FromAddress { get; init; } = string.Empty;
 
@@ -11,7 +11,13 @@ public sealed class EmailOptions
     public string FrontendBaseUrl { get; set; } = string.Empty;
 }
 
-public sealed class BrevoOptions
+public sealed class SmtpOptions
 {
-    public string? ApiKey { get; init; }
+    public string Host { get; init; } = string.Empty;
+
+    public int Port { get; init; } = 587;
+
+    public string? Username { get; init; }
+
+    public string? Password { get; init; }
 }

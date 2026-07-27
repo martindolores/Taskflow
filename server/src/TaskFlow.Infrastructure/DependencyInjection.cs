@@ -49,13 +49,14 @@ public static class DependencyInjection
             options.FrontendBaseUrl = configuration["Frontend:BaseUrl"] ?? string.Empty;
         });
 
-        if (string.IsNullOrWhiteSpace(configuration["Email:Brevo:ApiKey"]))
+        if (string.IsNullOrWhiteSpace(configuration["Email:Smtp:Host"]))
         {
             services.AddSingleton<IEmailService, NullEmailService>();
         }
         else
         {
-            services.AddHttpClient<IEmailService, BrevoEmailService>();
+            services.AddSingleton<ISmtpClient, SystemNetSmtpClient>();
+            services.AddSingleton<IEmailService, SmtpEmailService>();
         }
 
         return services;

@@ -26,7 +26,13 @@ services:
         value: "14"
       - key: Cors__AllowedOrigins
         sync: false
-      - key: Email__Brevo__ApiKey
+      - key: Email__Smtp__Host
+        sync: false
+      - key: Email__Smtp__Port
+        value: "587"
+      - key: Email__Smtp__Username
+        sync: false
+      - key: Email__Smtp__Password
         sync: false
       - key: Email__FromAddress
         sync: false
