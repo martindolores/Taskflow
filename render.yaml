@@ -26,3 +26,11 @@ services:
         value: "14"
       - key: Cors__AllowedOrigins
         sync: false
+      - key: Email__Brevo__ApiKey
+        sync: false
+      - key: Email__FromAddress
+        sync: false
+      - key: Email__FromName
+        value: "Taskflow"
+      - key: Frontend__BaseUrl
+        sync: false

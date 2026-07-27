@@ -35,6 +35,9 @@ Render's own free Postgres is deleted after 90 days. Neon's free tier has no exp
    | `ConnectionStrings__Default` | Neon connection string from §2 |
    | `Jwt__Secret` | random secret, e.g. `openssl rand -base64 32` |
    | `Cors__AllowedOrigins` | Vercel URL from §4 (comes second — see §5) |
+   | `Email__Brevo__ApiKey` | API key from the Brevo dashboard (SMTP & API → API Keys) |
+   | `Email__FromAddress` | the verified single-sender address from Brevo |
+   | `Frontend__BaseUrl` | Vercel URL from §4 (comes second — see §5) |
 
 3. Deploy manually once from the dashboard to get the initial build live. Confirm `https://<service>.onrender.com/health` returns healthy.
 4. Service → **Settings → Deploy Hook** → copy the URL. In the GitHub repo, add two Actions secrets:
