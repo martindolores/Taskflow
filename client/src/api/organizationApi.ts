@@ -27,6 +27,7 @@ export interface Invitation {
   status: InvitationStatus
   expiresAt: string
   token: string
+  emailSent: boolean
 }
 
 export interface CreateInvitationPayload {

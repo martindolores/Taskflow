@@ -26,14 +26,44 @@ test(
       status: 'Pending',
       expiresAt: '2026-08-01T00:00:00Z',
       token: 'invite-token-1',
+      emailSent: true,
+    })
+
+    await page.getByLabel('Email address').fill('member@example.com')
+    await page.getByRole('button', { name: 'Send invite' }).click()
+
+    await expect(page.getByText('Invitation email sent to member@example.com')).toBeVisible()
+    // Mirrors CreateInvitationRequest(Email, Role).
+    expect(await requestBody).toEqual({ email: 'member@example.com', role: 'Member' })
+  },
+)
+
+test(
+  'when the invitation email fails to send, the invite link fallback UI still renders',
+  { tag: '@mobile' },
+  async ({ page }) => {
+    await mockJson(page, 'GET', '/api/organization', fakeOrganization)
+    await mockJson(page, 'GET', '/api/organization/members', fakeMembers)
+    await mockJson(page, 'GET', '/api/organization/invitations', [])
+    await signInWithFakeSession(page)
+    await page.goto('/settings')
+
+    captureRequest(page, 'POST', '/api/organization/invitations', {
+      id: 'invitation-1',
+      email: 'member@example.com',
+      role: 'Member',
+      status: 'Pending',
+      expiresAt: '2026-08-01T00:00:00Z',
+      token: 'invite-token-1',
+      emailSent: false,
     })
 
     await page.getByLabel('Email address').fill('member@example.com')
     await page.getByRole('button', { name: 'Send invite' }).click()
 
     await expect(page.getByText('Invitation created')).toBeVisible()
-    // Mirrors CreateInvitationRequest(Email, Role).
-    expect(await requestBody).toEqual({ email: 'member@example.com', role: 'Member' })
+    await expect(page.getByText('Couldn’t send the email — share this link instead.')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Copy link' })).toBeVisible()
   },
 )
 

@@ -74,7 +74,11 @@ export function OrganizationSettingsScreen() {
   const updateMemberRole = useUpdateMemberRoleMutation()
   const deactivateMember = useDeactivateMemberMutation()
 
-  const [inviteToken, setInviteToken] = useState<string | null>(null)
+  const [createdInvitation, setCreatedInvitation] = useState<{
+    token: string
+    email: string
+    emailSent: boolean
+  } | null>(null)
   const [memberToRemove, setMemberToRemove] = useState<Member | null>(null)
 
   const inviteForm = useForm<InviteMemberFormValues>({
@@ -86,7 +90,14 @@ export function OrganizationSettingsScreen() {
     try {
       const invitation = await createInvitation.mutateAsync(values)
       inviteForm.reset()
-      setInviteToken(invitation.token)
+      setCreatedInvitation({
+        token: invitation.token,
+        email: invitation.email,
+        emailSent: invitation.emailSent,
+      })
+      if (invitation.emailSent) {
+        showToast(`Invitation email sent to ${invitation.email}`)
+      }
     } catch (error) {
       applyFieldErrors(error, inviteForm.setError)
     }
@@ -125,56 +136,103 @@ export function OrganizationSettingsScreen() {
             Invite team member
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.disabled', mb: 2.25 }}>
-            Create an invite link to share with the new member so they can join {orgName}.
+            We&rsquo;ll email them an invite link to join {orgName}.
           </Typography>
 
-          {inviteToken ? (
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.125,
-                bgcolor: 'rgba(34,197,94,0.07)',
-                border: '1px solid rgba(34,197,94,0.14)',
-                borderRadius: '8px',
-                padding: '11px 14px',
-              }}
-            >
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
-                <circle cx="8" cy="8" r="7" fill="#22c55e" opacity={0.15} />
-                <path
-                  d="M5 8l2.2 2.2 3.8-4"
-                  stroke="#22c55e"
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <Typography
-                variant="body2"
+          {createdInvitation ? (
+            createdInvitation.emailSent ? (
+              <Box
                 sx={{
-                  color: '#22c55e',
-                  flex: 1,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.125,
+                  padding: '11px 14px',
                 }}
               >
-                Invitation created — share this link: {buildInviteLink(inviteToken)}
-              </Typography>
-              <Button
-                onClick={() => void copyInviteLink(inviteToken)}
-                sx={{ fontSize: 12, minWidth: 0, p: 0, whiteSpace: 'nowrap' }}
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.disabled',
+                    flex: 1,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {buildInviteLink(createdInvitation.token)}
+                </Typography>
+                <Button
+                  onClick={() => void copyInviteLink(createdInvitation.token)}
+                  sx={{ fontSize: 12, minWidth: 0, p: 0, whiteSpace: 'nowrap' }}
+                >
+                  Copy link
+                </Button>
+                <Button
+                  onClick={() => setCreatedInvitation(null)}
+                  sx={{ color: 'text.disabled', fontSize: 12, minWidth: 0, p: 0 }}
+                >
+                  Dismiss
+                </Button>
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.75,
+                  bgcolor: 'rgba(34,197,94,0.07)',
+                  border: '1px solid rgba(34,197,94,0.14)',
+                  borderRadius: '8px',
+                  padding: '11px 14px',
+                }}
               >
-                Copy link
-              </Button>
-              <Button
-                onClick={() => setInviteToken(null)}
-                sx={{ color: 'text.disabled', fontSize: 12, minWidth: 0, p: 0 }}
-              >
-                Dismiss
-              </Button>
-            </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.125 }}>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    style={{ flexShrink: 0 }}
+                  >
+                    <circle cx="8" cy="8" r="7" fill="#22c55e" opacity={0.15} />
+                    <path
+                      d="M5 8l2.2 2.2 3.8-4"
+                      stroke="#22c55e"
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#22c55e',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Invitation created — share this link: {buildInviteLink(createdInvitation.token)}
+                  </Typography>
+                  <Button
+                    onClick={() => void copyInviteLink(createdInvitation.token)}
+                    sx={{ fontSize: 12, minWidth: 0, p: 0, whiteSpace: 'nowrap' }}
+                  >
+                    Copy link
+                  </Button>
+                  <Button
+                    onClick={() => setCreatedInvitation(null)}
+                    sx={{ color: 'text.disabled', fontSize: 12, minWidth: 0, p: 0 }}
+                  >
+                    Dismiss
+                  </Button>
+                </Box>
+                <Typography variant="body2" sx={{ color: '#f59e0b', fontSize: 12.5 }}>
+                  Couldn&rsquo;t send the email — share this link instead.
+                </Typography>
+              </Box>
+            )
           ) : (
             <Box
               component="form"
