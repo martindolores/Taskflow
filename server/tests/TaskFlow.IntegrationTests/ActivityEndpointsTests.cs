@@ -30,15 +30,29 @@ public class ActivityEndpointsTests(WebApplicationFactory<Program> factory) : IC
     private async Task<AdminContext> RegisterAdminAsync()
     {
         var client = factory.CreateClient();
+        var email = UniqueEmail();
         var response = await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest(
             OrganizationName: $"Acme Inc {Guid.NewGuid():N}",
-            Email: UniqueEmail(),
+            Email: email,
             Password: "correct-horse-battery",
             FirstName: "Ada",
             LastName: "Lovelace"));
         response.EnsureSuccessStatusCode();
         var body = (await response.Content.ReadFromJsonAsync<RegisterResponse>())!;
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", body.AccessToken);
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var user = await db.Users.IgnoreQueryFilters().SingleAsync(u => u.Id == body.UserId);
+            user.EmailConfirmed = true;
+            await db.SaveChangesAsync();
+        }
+
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
+        loginResponse.EnsureSuccessStatusCode();
+        var login = (await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions))!;
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
         return new AdminContext(client, body);
     }
 

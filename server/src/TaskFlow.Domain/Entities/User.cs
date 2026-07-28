@@ -22,6 +22,12 @@ public class User
 
     public UserStatus Status { get; set; }
 
+    public bool EmailConfirmed { get; set; }
+
+    public string? EmailVerificationToken { get; set; }
+
+    public DateTime? EmailVerificationTokenExpiresAt { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

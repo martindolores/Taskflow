@@ -53,6 +53,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
     {
         EmailAlreadyInUseException => (StatusCodes.Status409Conflict, exception.Message),
         InvalidCredentialsException => (StatusCodes.Status401Unauthorized, exception.Message),
+        EmailNotConfirmedException => (StatusCodes.Status403Forbidden, exception.Message),
         InvalidRefreshTokenException => (StatusCodes.Status401Unauthorized, exception.Message),
         InvalidInvitationException => (StatusCodes.Status400BadRequest, exception.Message),
         InvitationAlreadyPendingException => (StatusCodes.Status409Conflict, exception.Message),

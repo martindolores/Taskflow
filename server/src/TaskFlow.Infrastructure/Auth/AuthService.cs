@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.Application.Auth;
 using TaskFlow.Application.Auth.Dtos;
@@ -40,16 +41,17 @@ public sealed class AuthService(
             LastName = request.LastName,
             Role = UserRole.Admin,
             Status = UserStatus.Active,
+            EmailConfirmed = false,
+            EmailVerificationToken = RandomNumberGenerator.GetHexString(64),
+            EmailVerificationTokenExpiresAt = DateTime.UtcNow.AddDays(7),
         };
 
         db.Organizations.Add(organization);
         db.Users.Add(user);
 
-        var (accessToken, refreshToken) = IssueTokens(user);
-
         await db.SaveChangesAsync(cancellationToken);
 
-        return new RegisterResponse(user.Id, organization.Id, accessToken, refreshToken);
+        return new RegisterResponse(user.Id, organization.Id, EmailConfirmationRequired: true, AccessToken: null, RefreshToken: null);
     }
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -60,6 +62,11 @@ public sealed class AuthService(
         if (user is null || user.Status == UserStatus.Deactivated || !passwordHasher.Verify(request.Password, user.PasswordHash))
         {
             throw new InvalidCredentialsException();
+        }
+
+        if (!user.EmailConfirmed)
+        {
+            throw new EmailNotConfirmedException();
         }
 
         var (accessToken, refreshToken) = IssueTokens(user);
@@ -120,6 +127,7 @@ public sealed class AuthService(
             LastName = request.LastName,
             Role = invitation.Role,
             Status = UserStatus.Active,
+            EmailConfirmed = true,
         };
 
         invitation.Status = InvitationStatus.Accepted;

@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth.Dtos;
+using TaskFlow.Infrastructure.Persistence;
 
 namespace TaskFlow.IntegrationTests;
 
@@ -64,6 +67,15 @@ public class RateLimitingTests
         var email = UniqueEmail();
         var registerResponse = await client.PostAsJsonAsync("/api/auth/register", ValidRegisterRequest() with { Email = email });
         Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+        var registered = (await registerResponse.Content.ReadFromJsonAsync<RegisterResponse>())!;
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var user = await db.Users.IgnoreQueryFilters().SingleAsync(u => u.Id == registered.UserId);
+            user.EmailConfirmed = true;
+            await db.SaveChangesAsync();
+        }
 
         for (var i = 0; i < 5; i++)
         {

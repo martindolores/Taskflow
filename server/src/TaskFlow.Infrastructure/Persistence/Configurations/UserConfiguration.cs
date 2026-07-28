@@ -16,6 +16,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.LastName).HasMaxLength(100).IsRequired();
         builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(20).IsRequired();
         builder.Property(u => u.Status).HasConversion<string>().HasMaxLength(20).IsRequired();
+        builder.Property(u => u.EmailConfirmed).HasDefaultValue(false).IsRequired();
+        builder.Property(u => u.EmailVerificationToken).HasMaxLength(100);
         builder.Property(u => u.CreatedAt).HasDefaultValueSql("now()");
         builder.Property(u => u.UpdatedAt).HasDefaultValueSql("now()");
 

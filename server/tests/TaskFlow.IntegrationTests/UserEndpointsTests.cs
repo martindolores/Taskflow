@@ -4,8 +4,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using TaskFlow.Application.Auth.Dtos;
 using TaskFlow.Application.Users.Dtos;
+using TaskFlow.Infrastructure.Persistence;
 
 namespace TaskFlow.IntegrationTests;
 
@@ -18,10 +21,10 @@ public class UserEndpointsTests(WebApplicationFactory<Program> factory) : IClass
 
     private static string UniqueEmail() => $"user-{Guid.NewGuid():N}@acme.com";
 
-    private async Task<RegisterResponse> RegisterAsync(HttpClient client, string organizationName) =>
+    private async Task<RegisterResponse> RegisterAsync(HttpClient client, string organizationName, string email) =>
         (await (await client.PostAsJsonAsync("/api/auth/register", new RegisterRequest(
             OrganizationName: organizationName,
-            Email: UniqueEmail(),
+            Email: email,
             Password: "correct-horse-battery",
             FirstName: "Ada",
             LastName: "Lovelace"))).Content.ReadFromJsonAsync<RegisterResponse>())!;
@@ -31,8 +34,21 @@ public class UserEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     {
         var client = factory.CreateClient();
         var organizationName = $"Acme Inc {Guid.NewGuid():N}";
-        var registered = await RegisterAsync(client, organizationName);
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", registered.AccessToken);
+        var email = UniqueEmail();
+        var registered = await RegisterAsync(client, organizationName, email);
+
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var user = await db.Users.IgnoreQueryFilters().SingleAsync(u => u.Id == registered.UserId);
+            user.EmailConfirmed = true;
+            await db.SaveChangesAsync();
+        }
+
+        var loginResponse = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
+        loginResponse.EnsureSuccessStatusCode();
+        var login = (await loginResponse.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions))!;
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", login.AccessToken);
 
         var response = await client.GetAsync("/api/users/me");
 

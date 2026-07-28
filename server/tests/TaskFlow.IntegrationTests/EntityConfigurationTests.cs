@@ -88,6 +88,15 @@ public class UserConfigurationTests(WebApplicationFactory<Program> factory) : Mo
 
         Assert.Equal(typeof(string), property.GetProviderClrType());
     }
+
+    [Fact]
+    public void User_EmailConfirmedDefaultsToFalse()
+    {
+        var entityType = Model.FindEntityType(typeof(User))!;
+        var property = entityType.FindProperty(nameof(User.EmailConfirmed))!;
+
+        Assert.Equal(false, property.GetDefaultValue());
+    }
 }
 
 public class TaskItemConfigurationTests(WebApplicationFactory<Program> factory) : ModelTestBase(factory)

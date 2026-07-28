@@ -36,8 +36,28 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         return (await response.Content.ReadFromJsonAsync<RegisterResponse>())!;
     }
 
+    private async Task ConfirmEmailAsync(Guid userId)
+    {
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var user = await db.Users.IgnoreQueryFilters().SingleAsync(u => u.Id == userId);
+        user.EmailConfirmed = true;
+        await db.SaveChangesAsync();
+    }
+
+    private async Task<LoginResponse> RegisterAndLoginAsync(HttpClient client, string? email = null)
+    {
+        email ??= UniqueEmail();
+        var registered = await RegisterAsync(client, email);
+        await ConfirmEmailAsync(registered.UserId);
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<LoginResponse>(JsonOptions))!;
+    }
+
     [Fact]
-    public async Task Register_WithValidRequest_CreatesOrganizationAndReturnsTokens()
+    public async Task Register_WithValidRequest_CreatesOrganizationAndRequiresEmailConfirmation()
     {
         var client = factory.CreateClient();
 
@@ -48,8 +68,9 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         Assert.NotNull(body);
         Assert.NotEqual(Guid.Empty, body!.UserId);
         Assert.NotEqual(Guid.Empty, body.OrganizationId);
-        Assert.False(string.IsNullOrWhiteSpace(body.AccessToken));
-        Assert.False(string.IsNullOrWhiteSpace(body.RefreshToken));
+        Assert.True(body.EmailConfirmationRequired);
+        Assert.Null(body.AccessToken);
+        Assert.Null(body.RefreshToken);
     }
 
     [Fact]
@@ -80,7 +101,8 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     {
         var client = factory.CreateClient();
         var email = UniqueEmail();
-        await RegisterAsync(client, email);
+        var registered = await RegisterAsync(client, email);
+        await ConfirmEmailAsync(registered.UserId);
 
         var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
 
@@ -91,6 +113,18 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         Assert.False(string.IsNullOrWhiteSpace(body.RefreshToken));
         Assert.Equal(email, body.User.Email);
         Assert.Equal("Admin", body.User.Role.ToString());
+    }
+
+    [Fact]
+    public async Task Login_WithUnconfirmedEmail_ReturnsForbidden()
+    {
+        var client = factory.CreateClient();
+        var email = UniqueEmail();
+        await RegisterAsync(client, email);
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
     }
 
     [Fact]
@@ -119,25 +153,25 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     public async Task Refresh_WithValidToken_RotatesAndReturnsNewTokens()
     {
         var client = factory.CreateClient();
-        var registered = await RegisterAsync(client);
+        var loggedIn = await RegisterAndLoginAsync(client);
 
-        var response = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(registered.RefreshToken));
+        var response = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(loggedIn.RefreshToken));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<RefreshTokenResponse>();
         Assert.NotNull(body);
-        Assert.NotEqual(registered.RefreshToken, body!.RefreshToken);
-        Assert.NotEqual(registered.AccessToken, body.AccessToken);
+        Assert.NotEqual(loggedIn.RefreshToken, body!.RefreshToken);
+        Assert.NotEqual(loggedIn.AccessToken, body.AccessToken);
     }
 
     [Fact]
     public async Task Refresh_AfterRotation_RejectsOldToken()
     {
         var client = factory.CreateClient();
-        var registered = await RegisterAsync(client);
-        await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(registered.RefreshToken));
+        var loggedIn = await RegisterAndLoginAsync(client);
+        await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(loggedIn.RefreshToken));
 
-        var response = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(registered.RefreshToken));
+        var response = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(loggedIn.RefreshToken));
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -156,12 +190,12 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     public async Task Logout_RevokesToken_SubsequentRefreshFails()
     {
         var client = factory.CreateClient();
-        var registered = await RegisterAsync(client);
+        var loggedIn = await RegisterAndLoginAsync(client);
 
-        var logoutResponse = await client.PostAsJsonAsync("/api/auth/logout", new LogoutRequest(registered.RefreshToken));
+        var logoutResponse = await client.PostAsJsonAsync("/api/auth/logout", new LogoutRequest(loggedIn.RefreshToken));
         Assert.Equal(HttpStatusCode.NoContent, logoutResponse.StatusCode);
 
-        var refreshResponse = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(registered.RefreshToken));
+        var refreshResponse = await client.PostAsJsonAsync("/api/auth/refresh", new RefreshTokenRequest(loggedIn.RefreshToken));
         Assert.Equal(HttpStatusCode.Unauthorized, refreshResponse.StatusCode);
     }
 
@@ -178,7 +212,7 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
     private async Task<(HttpClient AdminClient, Guid InvitationId, string Email)> InviteMemberAsync()
     {
         var adminClient = factory.CreateClient();
-        var admin = await RegisterAsync(adminClient);
+        var admin = await RegisterAndLoginAsync(adminClient);
         adminClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", admin.AccessToken);
 
         var email = UniqueEmail();
@@ -212,6 +246,19 @@ public class AuthEndpointsTests(WebApplicationFactory<Program> factory) : IClass
         Assert.Equal(email, body!.User.Email);
         Assert.Equal("Member", body.User.Role.ToString());
         Assert.False(string.IsNullOrWhiteSpace(body.AccessToken));
+    }
+
+    [Fact]
+    public async Task AcceptInvitation_CreatesUserWithEmailConfirmed_CanLoginImmediately()
+    {
+        var (_, invitationId, email) = await InviteMemberAsync();
+        var token = await ReadInvitationTokenAsync(invitationId);
+        var client = factory.CreateClient();
+        await client.PostAsJsonAsync("/api/auth/accept-invitation", new AcceptInvitationRequest(token, "correct-horse-battery", "New", "Hire"));
+
+        var response = await client.PostAsJsonAsync("/api/auth/login", new LoginRequest(email, "correct-horse-battery"));
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
